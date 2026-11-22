@@ -1,0 +1,84 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --oat: #faf6f0;
+  --blush: #f6d1d8;
+  --mint: #bfe3dc;
+  --sky: #4da8da;
+  --butter: #f4d35e;
+  --cocoa: #2b2623;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  background: var(--oat);
+  color: var(--cocoa);
+  font-family: var(--font-body), system-ui, -apple-system, "Segoe UI", sans-serif;
+  -webkit-font-smoothing: antialiased;
+}
+
+::selection {
+  background: var(--butter);
+  color: var(--cocoa);
+}
+
+@layer components {
+  .section-shell {
+    @apply mx-auto w-full max-w-7xl px-5 sm:px-8;
+  }
+
+  .eyebrow {
+    @apply text-xs font-bold uppercase tracking-[0.22em] text-cocoa/60;
+  }
+
+  .display-title {
+    @apply font-display text-4xl leading-[1.08] tracking-tight sm:text-5xl lg:text-6xl;
+  }
+
+  .card {
+    @apply rounded-4xl border border-cocoa/10 bg-white/70 shadow-soft backdrop-blur;
+  }
+
+  .btn-primary {
+    @apply inline-flex items-center justify-center gap-2 rounded-full bg-cocoa px-6 py-3 text-sm font-semibold text-oat transition hover:bg-cocoa/85 focus:outline-none focus:ring-4 focus:ring-sky/30 disabled:cursor-not-allowed disabled:opacity-50;
+  }
+
+  .btn-ghost {
+    @apply inline-flex items-center justify-center gap-2 rounded-full border border-cocoa/15 bg-white/60 px-6 py-3 text-sm font-semibold text-cocoa transition hover:border-cocoa/30 hover:bg-white focus:outline-none focus:ring-4 focus:ring-sky/30;
+  }
+
+  .field {
+    @apply w-full rounded-2xl border border-cocoa/15 bg-white/80 px-4 py-3 text-sm text-cocoa outline-none transition placeholder:text-cocoa/40 focus:border-sky focus:ring-4 focus:ring-sky/15;
+  }
+
+  .chip {
+    @apply inline-flex items-center gap-2 rounded-full border border-cocoa/10 bg-white/70 px-3 py-1.5 text-xs font-semibold;
+  }
+}
+
+@keyframes float-soft {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-10px); }
+}
+
+.float-soft {
+  animation: float-soft 6s ease-in-out infinite;
+}
+
+@keyframes fade-up {
+  from { opacity: 0; transform: translateY(14px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.fade-up {
+  animation: fade-up 0.5s ease-out both;
+}
