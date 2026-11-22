@@ -47,19 +47,34 @@ export default function Configurator() {
         </div>
 
         <div className="mt-12 grid gap-8 lg:grid-cols-[1fr_1.05fr]">
-          <div className={`relative overflow-hidden rounded-4xl border border-white/70 shadow-soft ${color === "blush" ? "bg-blush/50" : color === "mint" ? "bg-mint/50" : "bg-oat"}`}>
-            <span className="absolute left-5 top-5 z-10 chip bg-white/85">{product.name}</span>
-            <Image
-              key={version}
-              src={product.image}
-              alt={`${product.name} in ${shellColors.find((c) => c.id === color)?.name}`}
-              width={1600}
-              height={1300}
-              className="mx-auto h-[420px] w-auto max-w-full object-contain sm:h-[520px]"
-            />
-            <div className="absolute bottom-5 left-5 right-5 flex items-center justify-between rounded-2xl bg-white/85 px-4 py-3 backdrop-blur">
-              <span className="text-xs font-semibold text-cocoa/60">Your build</span>
-              <span className="text-sm font-bold">{formatINR(grandTotal)}</span>
+          <div className="h-fit lg:sticky lg:top-24">
+            <div className={`relative overflow-hidden rounded-4xl border border-white/70 shadow-soft ${color === "blush" ? "bg-blush/50" : color === "mint" ? "bg-mint/50" : "bg-oat"}`}>
+              <span className="absolute left-5 top-5 z-10 chip bg-white/85">{product.name}</span>
+              <Image
+                key={version}
+                src={product.image}
+                alt={`${product.name} in ${shellColors.find((c) => c.id === color)?.name}`}
+                width={1600}
+                height={1300}
+                className="mx-auto h-[420px] w-auto max-w-full object-contain sm:h-[520px]"
+              />
+              <div className="absolute bottom-5 left-5 right-5 flex items-center justify-between rounded-2xl bg-white/85 px-4 py-3 backdrop-blur">
+                <span className="text-xs font-semibold text-cocoa/60">Your build</span>
+                <span className="text-sm font-bold">{formatINR(grandTotal)}</span>
+              </div>
+            </div>
+            <div className="mt-4 rounded-2xl border border-cocoa/10 bg-white/70 p-4 text-sm">
+              <p className="eyebrow">Live build summary</p>
+              <dl className="mt-3 grid grid-cols-2 gap-x-4 gap-y-2">
+                <dt className="text-cocoa/55">Version</dt><dd className="text-right font-semibold">{product.name}</dd>
+                <dt className="text-cocoa/55">Shell</dt><dd className="text-right font-semibold">{shellColors.find((c) => c.id === color)?.name}</dd>
+                <dt className="text-cocoa/55">Dog size</dt><dd className="text-right font-semibold">{dogSizes.find((d) => d.id === size)?.name} · {name || "Bruno"}</dd>
+                <dt className="text-cocoa/55">Add-ons</dt><dd className="text-right font-semibold">{selectedAddOns.length} selected</dd>
+              </dl>
+              <div className="mt-3 flex items-center justify-between border-t border-cocoa/10 pt-3">
+                <span className="font-semibold">Total</span>
+                <span className="font-display text-lg font-bold">{formatINR(grandTotal)}</span>
+              </div>
             </div>
           </div>
 

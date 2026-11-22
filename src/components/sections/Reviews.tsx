@@ -48,7 +48,7 @@ export default function Reviews() {
         <div className="flex items-center gap-3 rounded-2xl bg-butter/30 px-5 py-3">
           <span className="font-display text-4xl font-bold">{average}</span>
           <span>
-            <span className="block text-butter-700 text-lg">★★★★★</span>
+            <span className="block text-[#C8912B] text-lg">★★★★★</span>
             <span className="block text-xs text-cocoa/60">{reviews.length} reviews</span>
           </span>
         </div>

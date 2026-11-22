@@ -1,4 +1,5 @@
 import Link from "next/link";
+import PawIcon from "@/components/PawIcon";
 
 export default function Footer() {
   return (
@@ -6,7 +7,9 @@ export default function Footer() {
       <div className="section-shell grid gap-10 py-14 md:grid-cols-4">
         <div className="md:col-span-2">
           <div className="flex items-center gap-2.5">
-            <span className="grid h-10 w-10 place-items-center rounded-2xl bg-cocoa text-lg">🐾</span>
+            <span className="grid h-10 w-10 place-items-center rounded-2xl bg-cocoa">
+              <PawIcon className="h-6 w-6 text-butter" />
+            </span>
             <span className="font-display text-xl font-bold">PawVault</span>
           </div>
           <p className="mt-4 max-w-md text-sm leading-relaxed text-cocoa/70">

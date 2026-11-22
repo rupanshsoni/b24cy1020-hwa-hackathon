@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { useStore } from "@/store/StoreContext";
+import PawIcon from "@/components/PawIcon";
 
 export default function Navbar() {
   const { items, openCart, total } = useStore();
@@ -11,8 +12,8 @@ export default function Navbar() {
     <header className="sticky top-0 z-40 border-b border-cocoa/10 bg-oat/90 backdrop-blur-xl">
       <div className="section-shell flex h-[72px] items-center justify-between gap-4">
         <Link href="/" className="group flex items-center gap-2.5" aria-label="PawVault home">
-          <span className="grid h-10 w-10 place-items-center rounded-2xl bg-cocoa text-lg text-butter transition group-hover:rotate-6">
-            🐾
+          <span className="grid h-10 w-10 place-items-center rounded-2xl bg-cocoa transition group-hover:rotate-6">
+            <PawIcon className="h-6 w-6 text-butter" />
           </span>
           <span className="font-display text-xl font-bold tracking-tight">PawVault</span>
         </Link>
@@ -25,12 +26,6 @@ export default function Navbar() {
         </nav>
 
         <div className="flex items-center gap-2">
-          <Link
-            href="/track"
-            className="hidden rounded-full px-4 py-2 text-sm font-semibold transition hover:bg-cocoa/5 sm:inline-flex"
-          >
-            Track Order
-          </Link>
           <button
             type="button"
             onClick={openCart}

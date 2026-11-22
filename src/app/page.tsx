@@ -1,5 +1,5 @@
-import Hero from "@/components/sections/Hero";
-import HowItWorks from "@/components/sections/HowItWorks";
+import HeroScene from "@/components/sections/HeroScene";
+import Explorer from "@/components/sections/Explorer";
 import Configurator from "@/components/sections/Configurator";
 import Science from "@/components/sections/Science";
 import Comparison from "@/components/sections/Comparison";
@@ -11,8 +11,8 @@ import Contact from "@/components/sections/Contact";
 export default function Home() {
   return (
     <main>
-      <Hero />
-      <HowItWorks />
+      <HeroScene />
+      <Explorer />
       <Configurator />
       <Science />
       <Comparison />
