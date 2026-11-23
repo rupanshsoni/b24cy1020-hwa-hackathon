@@ -1,39 +1,89 @@
 "use client";
 
 import { useState } from "react";
+import { ChevronDownIcon } from "@/components/icons/PawVaultIcons";
 import { faqs } from "@/data/faqs";
 
+type Topic = "All" | "Puzzles and Safety" | "Audio and Tech" | "Orders and Mission";
+
+const topics: Topic[] = ["All", "Puzzles and Safety", "Audio and Tech", "Orders and Mission"];
+
+const topicByIndex = [
+  "Puzzles and Safety",
+  "Puzzles and Safety",
+  "Puzzles and Safety",
+  "Audio and Tech",
+  "Audio and Tech",
+  "Puzzles and Safety",
+  "Orders and Mission",
+  "Orders and Mission",
+] as const;
+
 export default function Faq() {
+  const [topic, setTopic] = useState<Topic>("All");
   const [open, setOpen] = useState<number | null>(0);
 
+  const visible = faqs
+    .map((faq, index) => ({ ...faq, index }))
+    .filter(({ index }) => topic === "All" || topicByIndex[index] === topic);
+
   return (
-    <section id="faq" className="scroll-mt-24 bg-white/50 py-16">
-      <div className="section-shell grid gap-10 lg:grid-cols-[0.8fr_1.2fr]">
-        <div>
-          <p className="eyebrow">Good questions</p>
-          <h2 className="display-title mt-3">Everything you might ask.</h2>
-          <p className="mt-4 text-cocoa/65">Still curious? The contact form below reaches a real human.</p>
-        </div>
-        <div className="space-y-3">
-          {faqs.map((faq, i) => {
-            const isOpen = open === i;
-            return (
-              <div key={faq.question} className="overflow-hidden rounded-2xl border border-cocoa/10 bg-white">
+    <section id="faq" data-nav-theme="light" className="scroll-mt-24 bg-[#EFE3CF] py-20">
+      <div className="section-shell">
+        <div className="grid gap-10 lg:grid-cols-[0.8fr_1.2fr]">
+          <div>
+            <p className="eyebrow">Good questions</p>
+            <h2 className="display-title mt-3">Everything you might ask.</h2>
+            <p className="mt-4 text-cocoa/65">Still curious? The contact form below reaches a real human.</p>
+            <div className="mt-8 flex flex-wrap gap-2">
+              {topics.map((item) => (
                 <button
+                  key={item}
                   type="button"
-                  onClick={() => setOpen(isOpen ? null : i)}
-                  className="flex w-full items-center justify-between gap-4 px-5 py-4 text-left"
-                  aria-expanded={isOpen}
+                  onClick={() => {
+                    setTopic(item);
+                    setOpen(null);
+                  }}
+                  aria-pressed={topic === item}
+                  className={`chip ${
+                    topic === item
+                      ? "border border-pine bg-pine text-oat"
+                      : "border border-pine/15 text-pine"
+                  }`}
                 >
-                  <span className="font-semibold">{faq.question}</span>
-                  <span className={`grid h-7 w-7 shrink-0 place-items-center rounded-full bg-cocoa text-oat transition ${isOpen ? "rotate-45" : ""}`}>+</span>
+                  {item}
                 </button>
-                {isOpen && (
-                  <p className="border-t border-cocoa/10 px-5 py-4 text-sm leading-relaxed text-cocoa/70">{faq.answer}</p>
-                )}
-              </div>
-            );
-          })}
+              ))}
+            </div>
+          </div>
+          <div className="divide-y divide-pine/15 border-y border-pine/15">
+            {visible.map(({ question, answer, index }) => {
+              const isOpen = open === index;
+              return (
+                <div key={question}>
+                  <button
+                    type="button"
+                    onClick={() => setOpen(isOpen ? null : index)}
+                    className="flex w-full items-start gap-4 py-5 text-left"
+                    aria-expanded={isOpen}
+                  >
+                    <span className="tnum font-display w-10 shrink-0 pt-0.5 text-sm text-pine/50">
+                      {String(index + 1).padStart(2, "0")}
+                    </span>
+                    <span className="flex-1 font-semibold text-cocoa">{question}</span>
+                    <ChevronDownIcon
+                      className={`mt-0.5 h-5 w-5 shrink-0 text-pine transition-transform ${
+                        isOpen ? "rotate-180" : ""
+                      }`}
+                    />
+                  </button>
+                  {isOpen && (
+                    <p className="pb-5 pl-14 pr-8 text-sm leading-relaxed text-cocoa/70">{answer}</p>
+                  )}
+                </div>
+              );
+            })}
+          </div>
         </div>
       </div>
     </section>

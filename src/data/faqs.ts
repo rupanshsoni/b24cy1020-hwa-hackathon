@@ -7,12 +7,12 @@ export const faqs: Faq[] = [
   {
     question: "What is PawVault, exactly?",
     answer:
-      "It is a weighted, chew-proof, modular 5-in-1 dog enrichment vault made from platinum-cured food-grade silicone on a reinforced matte base. Five dog-IQ puzzles unlock in sequence across a 4–6 hour workday, so the challenge lasts — not 15 minutes.",
+      "It is a weighted, chew-proof, modular 5-in-1 dog enrichment vault made from platinum-cured food-grade silicone on a reinforced matte base. Five dog-IQ puzzles unlock in sequence across a 4 to 6 hour workday, so the challenge lasts, not 15 minutes.",
   },
   {
     question: "How does the scratch pad keep my dog safe?",
     answer:
-      "The fine-grit board is gently sloped and files front claws naturally. After 3–4 scrapes it unlocks the next puzzle then goes dormant until the next cycle, so there is no way to over-file the quick. Smart models glow blue or yellow; Pure uses a mechanical spring ratchet.",
+      "The fine-grit board is gently sloped and files front claws naturally. After 3 to 4 scrapes it unlocks the next puzzle then goes dormant until the next cycle, so there is no way to over-file the quick. Smart models glow blue or yellow; Pure uses a mechanical spring ratchet.",
   },
   {
     question: "What can I put in the Frozen Lick Dome?",
@@ -27,7 +27,7 @@ export const faqs: Faq[] = [
   {
     question: "How loud is the audio?",
     answer:
-      "It is deliberately capped at 45–55 dB with a low-pass filter,so it is soothing rather than startling — about the level of a quiet conversation in the next room.",
+      "It is deliberately capped at 45 to 55 dB with a low-pass filter, so it is soothing rather than startling, about the level of a quiet conversation in the next room.",
   },
   {
     question: "How do I clean it?",
@@ -42,6 +42,6 @@ export const faqs: Faq[] = [
   {
     question: "How long does delivery take and how do I track it?",
     answer:
-      "We ship across India in 3–6 working days. Your order gets a PV-2026-XXXX ID at checkout — enter it on the Track Order page for a live status update.",
+      "We ship across India in 3 to 6 working days. Your order gets a PV-2026-XXXX ID at checkout; enter it on the Track Order page for a live status update.",
   },
 ];

@@ -13,7 +13,7 @@ export const comparisonRows: ComparisonRow[] = [
   { feature: "Nose-spin forage wheel", pure: true, smart: true },
   { feature: "Owner-scent vent", pure: true, smart: true },
   { feature: "LED blue/yellow guides", pure: false, smart: true },
-  { feature: "Timed owner voice callouts", pure: false, smart: "45–55 dB" },
+  { feature: "Timed owner voice callouts", pure: false, smart: "45 to 55 dB" },
   { feature: "5-genre daily audio rotation", pure: false, smart: true },
   { feature: "10-minute calm voice track", pure: false, smart: true },
   { feature: "Battery life", pure: "None needed", smart: "14 days, USB-C" },

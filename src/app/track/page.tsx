@@ -1,7 +1,7 @@
 import { Suspense } from "react";
 import TrackClient from "@/components/TrackClient";
 
-export const metadata = { title: "Track Order — PawVault" };
+export const metadata = { title: "Track Order | PawVault" };
 
 export default function TrackPage() {
   return (

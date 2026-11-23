@@ -139,7 +139,7 @@ export function StoreProvider({ children }: { children: ReactNode }) {
     const found = promos.find((p) => p.code === code.trim().toUpperCase());
     if (!found) return { ok: false, message: "That code isn't valid. Try GOODBOY15 or CALMPUP10." };
     setPromoCode(found.code);
-    return { ok: true, message: `${found.label} applied — good dog!` };
+    return { ok: true, message: `${found.label} applied, good dog!` };
   }, []);
 
   const removePromo = useCallback(() => setPromoCode(null), []);

@@ -24,7 +24,7 @@ export const studies: Study[] = [
   {
     id: "habituation",
     authors: "Bowman et al.; Brayley & Montrose",
-    year: "2015–2017",
+    year: "2015 to 2017",
     title: "The 7-day auditory habituation rule",
     citation:
       "Bowman et al. (2015, 2017); Brayley & Montrose (2016). Applied Animal Behaviour Science.",
@@ -51,7 +51,7 @@ export const studies: Study[] = [
     title: "Canine dichromatic vision",
     citation: "Neitz, J., Geist, T. & Jacobs, G. (1989). Vision Research.",
     finding:
-      "Dogs discriminate blue (~429 nm) and yellow (~555 nm) cleanly, while pinks and greens read as soft neutrals — the basis of our target colours.",
+      "Dogs discriminate blue (~429 nm) and yellow (~555 nm) cleanly, while pinks and greens read as soft neutrals, the basis of our target colours.",
     feature: "Sky Blue + Butter Yellow cues on neutral shells",
     tag: "Design",
   },

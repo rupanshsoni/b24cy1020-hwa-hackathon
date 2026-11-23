@@ -1,33 +1,74 @@
+const ledger = [
+  { label: "of every order", value: "10%" },
+  { label: "meals funded", value: "1,280+" },
+  { label: "cities active", value: "3" },
+  { label: "current batch", value: "PV-2026" },
+];
+
+const ink = "#12352E";
+const hairline = "rgba(18, 53, 46, 0.35)";
+
 export default function Mission() {
   return (
-    <section id="mission" className="section-shell scroll-mt-24 py-16">
-      <div className="card overflow-hidden bg-gradient-to-br from-mint/50 via-oat to-blush/50 p-8 sm:p-12">
-        <div className="grid items-center gap-10 lg:grid-cols-2">
+    <section
+      id="mission"
+      data-nav-theme="light"
+      className="scroll-mt-24"
+      style={{ backgroundColor: "#F5C942", color: ink }}
+    >
+        <div className="section-shell pt-16 pb-28 sm:pt-24 sm:pb-32">
+        <div className="grid items-start gap-12 lg:grid-cols-2 lg:gap-16">
           <div>
-            <p className="eyebrow">10% of every order</p>
+            <p className="eyebrow">Our mission</p>
             <h2 className="display-title mt-3">Good dogs everywhere.</h2>
-            <p className="mt-5 max-w-lg leading-relaxed text-cocoa/70">
-              Every PawVault order funds feeding stations and basic veterinary care for street dogs in the cities we ship to. We publish the running impact total and share photos from the field — because the dogs who have nothing still deserve a little enrichment.
+            <p className="mt-6 max-w-xl text-lg leading-relaxed">
+              Street dogs have no one to speak for them. We speak for them with
+              every order you place. Ten percent of what you spend goes to
+              feeding stations and basic vet care in the cities we ship to. No
+              glossy reports. No empty promises. Just food in bowls and medicine
+              where it is needed, and we show you the photos from the field to
+              prove it. You should be able to see exactly where your money goes.
             </p>
-            <div className="mt-8 flex flex-wrap gap-3">
-              <div className="rounded-2xl bg-white/80 px-5 py-4">
-                <p className="font-display text-3xl font-bold">10%</p>
-                <p className="text-xs text-cocoa/60">of revenue, every order</p>
-              </div>
-              <div className="rounded-2xl bg-white/80 px-5 py-4">
-                <p className="font-display text-3xl font-bold">1,280+</p>
-                <p className="text-xs text-cocoa/60">meals funded so far</p>
-              </div>
+
+            <div className="mt-12">
+              <p className="eyebrow">Impact ledger</p>
+              <dl className="mt-4">
+                {ledger.map((row) => (
+                  <div
+                    key={row.value}
+                    className="flex items-baseline justify-between gap-6 border-t py-3"
+                    style={{ borderColor: hairline }}
+                  >
+                    <dt className="uppercase tracking-wide">{row.label}</dt>
+                    <dd className="font-display tnum text-2xl font-bold sm:text-3xl">
+                      {row.value}
+                    </dd>
+                  </div>
+                ))}
+              </dl>
             </div>
           </div>
-          <div className="relative mx-auto grid h-72 w-72 place-items-center rounded-full border-[14px] border-white/80 bg-butter/30 shadow-soft">
-            <div className="text-center">
-              <p className="text-7xl">🐕</p>
-              <p className="mt-2 font-display text-xl font-bold">Thank you.</p>
+
+          <figure className="m-0">
+            <div
+              className="border p-2"
+              style={{ borderColor: ink }}
+            >
+              <img
+                src="/images/mission-street-dog-care.webp"
+                alt="A volunteer providing food and basic care to a street dog"
+                className="block w-full object-cover"
+                style={{ aspectRatio: "4 / 5" }}
+                loading="lazy"
+              />
             </div>
-            <span className="absolute -left-2 top-6 grid h-14 w-14 place-items-center rounded-full bg-sky text-white shadow-soft">🐾</span>
-            <span className="absolute -right-3 bottom-10 grid h-12 w-12 place-items-center rounded-full bg-blush shadow-soft">♥</span>
-          </div>
+            <figcaption
+              className="mt-3 text-xs uppercase tracking-widest"
+              style={{ opacity: 0.7 }}
+            >
+              From the field
+            </figcaption>
+          </figure>
         </div>
       </div>
     </section>

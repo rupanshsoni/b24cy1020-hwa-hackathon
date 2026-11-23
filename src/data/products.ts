@@ -23,7 +23,7 @@ export const products: Product[] = [
     price: 2499,
     tagline: "Quiet by design. Brilliant by nature.",
     description:
-      "The fully mechanical 5-in-1 enrichment vault. A wind-up timer ring and spring-ratchet latch pace five puzzles across a 4–6 hour workday — no batteries, no screens, no noise.",
+      "The fully mechanical 5-in-1 enrichment vault. A wind-up timer ring and spring-ratchet latch pace five puzzles across a 4 to 6 hour workday, no batteries, no screens, no noise.",
     image: "/images/pawvault-pure-assembled.webp",
     color: "bg-blush",
     accent: "#F6D1D8",
@@ -45,7 +45,7 @@ export const products: Product[] = [
     price: 4299,
     tagline: "A calmer workday, guided by your voice.",
     description:
-      "Everything in Pure, plus a piezo scratch sensor, Sky Blue and Butter Yellow LED guides, timed owner voice callouts and a 5-genre daily audio rotation — all sealed in a USB-C audio core with 14-day battery life.",
+      "Everything in Pure, plus a piezo scratch sensor, Sky Blue and Butter Yellow LED guides, timed owner voice callouts and a 5-genre daily audio rotation, all sealed in a USB-C audio core with 14-day battery life.",
     image: "/images/pawvault-smart-hero.webp",
     color: "bg-mint",
     accent: "#BFE3DC",
@@ -53,7 +53,7 @@ export const products: Product[] = [
     features: [
       "All five puzzle compartments from Pure",
       "Piezo sensor with blue/yellow LED guides",
-      "Timed owner voice callouts (45–55 dB)",
+      "Timed owner voice callouts (45 to 55 dB)",
       "10-minute calm voice track",
       "5-genre daily rotation with low-pass filter",
       "USB-C sealed core, 14-day battery, zero subscription",
@@ -74,6 +74,6 @@ export const shellColors = [
 
 export const dogSizes = [
   { id: "small", name: "Small", detail: "Under 10 kg" },
-  { id: "medium", name: "Medium", detail: "10–25 kg" },
+  { id: "medium", name: "Medium", detail: "10 to 25 kg" },
   { id: "large", name: "Large", detail: "Over 25 kg" },
 ];

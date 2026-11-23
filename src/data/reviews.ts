@@ -56,7 +56,7 @@ export const initialReviews: Review[] = [
     dog: "Luna",
     rating: 4,
     title: "Beautiful on the floor, clever in the room",
-    body: "The mint shell looks lovely in our living room. The scent disc rotation is a nice touch — Luna investigates the ginger one every time.",
+    body: "The mint shell looks lovely in our living room. The scent disc rotation is a nice touch, and Luna investigates the ginger one every time.",
     date: "3 Jun 2026",
     version: "Smart",
   },
