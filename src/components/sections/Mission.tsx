@@ -1,3 +1,5 @@
+import { MaskedHeading, ParallaxFrame, CountUpValue } from "@/components/MotionPrimitives";
+
 const ledger = [
   { label: "of every order", value: "10%" },
   { label: "meals funded", value: "1,280+" },
@@ -13,14 +15,14 @@ export default function Mission() {
     <section
       id="mission"
       data-nav-theme="light"
-      className="scroll-mt-24"
+      className="-mt-10 scroll-mt-24 rounded-t-[40px] lg:-mt-14 lg:rounded-t-[56px]"
       style={{ backgroundColor: "#F5C942", color: ink }}
     >
-        <div className="section-shell pt-16 pb-28 sm:pt-24 sm:pb-32">
+        <div className="section-shell pt-24 pb-28 sm:pt-28 sm:pb-32">
         <div className="grid items-start gap-12 lg:grid-cols-2 lg:gap-16">
           <div>
             <p className="eyebrow">Our mission</p>
-            <h2 className="display-title mt-3">Good dogs everywhere.</h2>
+            <MaskedHeading as="h2" className="display-title mt-3">Good dogs everywhere.</MaskedHeading>
             <p className="mt-6 max-w-xl text-lg leading-relaxed">
               Street dogs have no one to speak for them. We speak for them with
               every order you place. Ten percent of what you spend goes to
@@ -41,7 +43,7 @@ export default function Mission() {
                   >
                     <dt className="uppercase tracking-wide">{row.label}</dt>
                     <dd className="font-display tnum text-2xl font-bold sm:text-3xl">
-                      {row.value}
+                      {row.value === "PV-2026" ? row.value : <CountUpValue value={row.value} />}
                     </dd>
                   </div>
                 ))}
@@ -54,13 +56,15 @@ export default function Mission() {
               className="border p-2"
               style={{ borderColor: ink }}
             >
-              <img
-                src="/images/mission-street-dog-care.webp"
-                alt="A volunteer providing food and basic care to a street dog"
-                className="block w-full object-cover"
-                style={{ aspectRatio: "4 / 5" }}
-                loading="lazy"
-              />
+              <ParallaxFrame speed={6}>
+                <img
+                  src="/images/mission-street-dog-care.webp"
+                  alt="A volunteer providing food and basic care to a street dog"
+                  className="block w-full object-cover"
+                  style={{ aspectRatio: "4 / 5" }}
+                  loading="lazy"
+                />
+              </ParallaxFrame>
             </div>
             <figcaption
               className="mt-3 text-xs uppercase tracking-widest"

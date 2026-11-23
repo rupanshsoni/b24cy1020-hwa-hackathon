@@ -1,5 +1,6 @@
 import Image from "next/image";
 
+import { CubertoButton, MaskedHeading } from "@/components/MotionPrimitives";
 import { ArrowRightIcon, CheckIcon } from "@/components/icons/PawVaultIcons";
 import { products } from "@/data/products";
 
@@ -12,8 +13,7 @@ type ShowcaseItem = {
   ink: string;
   accent: string;
   check: string;
-  cta: string;
-  imageClass: string;
+  cta: "dark" | "primary";
 };
 
 const rupees = (value: number | string) =>
@@ -32,8 +32,7 @@ const items: ShowcaseItem[] = [
     ink: "text-[#12352E]",
     accent: "text-[#12352E]",
     check: "text-[#12352E]",
-    cta: "bg-[#12352E] text-[#F7EFE2]",
-    imageClass: "scale-[1.20] origin-top-left object-cover object-[48%_24%]",
+    cta: "dark",
   },
   {
     product: findProduct("smart"),
@@ -42,8 +41,7 @@ const items: ShowcaseItem[] = [
     ink: "text-[#F7EFE2]",
     accent: "text-[#F5C942]",
     check: "text-[#F5C942]",
-    cta: "bg-[#F5C942] text-[#211A17]",
-    imageClass: "scale-[1.24] origin-top-left object-cover object-[42%_36%]",
+    cta: "primary",
   },
 ];
 
@@ -53,9 +51,9 @@ export default function ExplorerShowcase() {
       <div className="mb-4 flex flex-wrap items-end justify-between gap-4">
         <div className="max-w-2xl">
           <span className="chip">Meet the explorers</span>
-          <h2 className="font-display mt-4 text-4xl leading-tight sm:text-5xl">
+          <MaskedHeading as="h2" className="font-display mt-4 text-4xl leading-tight sm:text-5xl">
             Two companions, one promise of calmer days
-          </h2>
+          </MaskedHeading>
         </div>
         <p className="max-w-sm text-sm opacity-70">
           Pick the PawVault that fits your routine. Both keep every treat
@@ -69,16 +67,19 @@ export default function ExplorerShowcase() {
           return (
             <article
               key={product.id}
-              className={`${item.surface} ${item.ink} flex flex-col rounded-3xl p-5 sm:p-6`}
+              data-cursor-icon="arrow-up-right"
+              className={`${item.surface} ${item.ink} group flex flex-col rounded-3xl p-5 sm:p-6`}
             >
-              <div className="relative aspect-[4/3] w-full overflow-hidden rounded-3xl">
-                <Image
-                  src={item.image}
-                  alt={product.name}
-                  fill
-                  sizes="(max-width: 1024px) 100vw, 50vw"
-                  className={`h-full w-full ${item.imageClass}`}
-                />
+              <div className="cuberto-card-media relative aspect-[4/3] w-full overflow-hidden rounded-3xl">
+                <div className="absolute inset-0 scale-[1.06]">
+                  <Image
+                    src={item.image}
+                    alt={product.name}
+                    fill
+                    sizes="(max-width: 1024px) 100vw, 50vw"
+                    className="cuberto-card-media-inner h-full w-full object-cover object-[45%_48%]"
+                  />
+                </div>
               </div>
 
               <div className="flex flex-1 flex-col px-1 pt-6">
@@ -103,13 +104,14 @@ export default function ExplorerShowcase() {
                   ))}
                 </ul>
 
-                <a
+                <CubertoButton
+                  variant={item.cta}
                   href="#configure"
-                  className={`btn-magnetic mt-7 inline-flex items-center justify-center gap-2 self-start rounded-full px-6 py-3 text-sm font-semibold ${item.cta}`}
+                  className="mt-7 self-start"
                 >
                   Configure {product.shortName}
                   <ArrowRightIcon className="h-4 w-4" />
-                </a>
+                </CubertoButton>
               </div>
             </article>
           );

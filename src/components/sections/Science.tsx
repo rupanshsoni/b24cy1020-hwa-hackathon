@@ -3,6 +3,7 @@
 import { useRef, useState } from "react";
 import ScienceTimeline from "@/components/sections/ScienceTimeline";
 import SoundLab from "@/components/sections/SoundLab";
+import { MaskedHeading, ParallaxFrame } from "@/components/MotionPrimitives";
 import { studies } from "@/data/studies";
 import { useStore } from "@/store/StoreContext";
 import {
@@ -41,44 +42,46 @@ function Citation({
           <span className={`chip ${dark ? "bg-cream/15 text-cream" : "bg-blush/40"}`}>{study.tag}</span>
           <span>{study.title}</span>
         </span>
-        <span className="flex shrink-0 items-center gap-1 text-xs opacity-70">
+        <span className={`flex shrink-0 items-center gap-1 text-xs transition-opacity duration-300 ${open ? "opacity-100" : "opacity-70"}`}>
           {open ? "Hide" : "Citation"}
-          <span className={`transition-transform ${open ? "rotate-180" : ""}`}>
+          <span className={`transition-transform duration-300 ease-[cubic-bezier(0.16,1,0.3,1)] ${open ? "rotate-180" : ""}`}>
             <ChevronDownIcon />
           </span>
         </span>
       </button>
-      {open && (
-        <div
-          className={`fade-up space-y-3 border-t px-4 py-4 text-sm ${
-            dark ? "border-cream/15 text-cream/75" : "border-pine/15 text-cocoa/75"
-          }`}
-        >
-          <div>
-            <p className={`text-xs font-bold uppercase tracking-widest ${dark ? "text-mint" : "text-cocoa/45"}`}>
-              Journal citation
-            </p>
-            <p className="mt-1">{study.citation}</p>
-            <p className={`mt-1 text-xs ${dark ? "text-cream/55" : "text-cocoa/50"}`}>
-              {study.authors} ({study.year})
-            </p>
-          </div>
-          <div>
-            <p className={`text-xs font-bold uppercase tracking-widest ${dark ? "text-mint" : "text-cocoa/45"}`}>
-              Key finding
-            </p>
-            <p className="mt-1">{study.finding}</p>
-          </div>
-          <div>
-            <p className={`text-xs font-bold uppercase tracking-widest ${dark ? "text-mint" : "text-cocoa/45"}`}>
-              PawVault hardware mapping
-            </p>
-            <p className={`mt-1 rounded-xl px-3 py-2 font-semibold ${dark ? "bg-mint/20 text-mint" : "bg-mint/40 text-pine"}`}>
-              {study.feature}
-            </p>
+      <div className="cuberto-accordion" data-open={open ? "true" : "false"}>
+        <div className="cuberto-accordion-inner overflow-hidden">
+          <div
+            className={`space-y-3 border-t px-4 py-4 text-sm ${
+              dark ? "border-cream/15 text-cream/75" : "border-pine/15 text-cocoa/75"
+            }`}
+          >
+            <div>
+              <p className={`text-xs font-bold uppercase tracking-widest ${dark ? "text-mint" : "text-cocoa/45"}`}>
+                Journal citation
+              </p>
+              <p className="mt-1">{study.citation}</p>
+              <p className={`mt-1 text-xs ${dark ? "text-cream/55" : "text-cocoa/50"}`}>
+                {study.authors} ({study.year})
+              </p>
+            </div>
+            <div>
+              <p className={`text-xs font-bold uppercase tracking-widest ${dark ? "text-mint" : "text-cocoa/45"}`}>
+                Key finding
+              </p>
+              <p className="mt-1">{study.finding}</p>
+            </div>
+            <div>
+              <p className={`text-xs font-bold uppercase tracking-widest ${dark ? "text-mint" : "text-cocoa/45"}`}>
+                PawVault hardware mapping
+              </p>
+              <p className={`mt-1 rounded-xl px-3 py-2 font-semibold ${dark ? "bg-mint/20 text-mint" : "bg-mint/40 text-pine"}`}>
+                {study.feature}
+              </p>
+            </div>
           </div>
         </div>
-      )}
+      </div>
     </div>
   );
 }
@@ -103,6 +106,7 @@ function VisionSlider() {
   return (
     <div
       ref={frameRef}
+      data-cursor="drag"
       className="relative mt-8 aspect-[16/10] w-full max-w-4xl select-none overflow-hidden rounded-3xl border border-cream/20 bg-cocoa"
       onPointerDown={handleDown}
       onPointerMove={(e) => {
@@ -202,12 +206,12 @@ export default function Science() {
 
   return (
     <div>
-      <section data-nav-theme="dark" id="science" className="-mt-10 scroll-mt-24 rounded-t-[40px] bg-pine py-20 text-cream lg:-mt-14 lg:rounded-t-[56px]">
+      <section data-nav-theme="dark" id="science" className="relative z-10 -mt-10 scroll-mt-24 rounded-t-[40px] bg-pine pt-20 pb-28 text-cream lg:-mt-14 lg:rounded-t-[56px]">
         <div className="section-shell mx-auto max-w-6xl">
           <p className="eyebrow text-butter">Chapter 01 and the evidence</p>
-          <h2 className="display-title mt-3 max-w-3xl text-cream">
+          <MaskedHeading as="h2" className="display-title mt-3 max-w-3xl text-cream">
             Six studies, built into every hour of the hardware.
-          </h2>
+          </MaskedHeading>
           <p className="mt-4 max-w-2xl text-cream/70">
             Follow a full workday of science, hear the audio modes for yourself, then open any study to see exactly what backs each feature.
           </p>
@@ -216,9 +220,9 @@ export default function Science() {
             <div>
               <span className="font-display text-7xl font-bold text-butter/30">01</span>
               <p className="eyebrow mt-3 text-butter">Canine dichromatic vision</p>
-              <h3 className="mt-3 font-display text-4xl font-bold leading-tight sm:text-5xl">
+              <MaskedHeading as="h3" className="mt-3 font-display text-4xl font-bold leading-tight sm:text-5xl">
                 He does not see your world in full colour. He sees a smarter one.
-              </h3>
+              </MaskedHeading>
               <p className="mt-4 text-cream/70">
                 Neitz, Geist and Jacobs (1989) showed that dogs read the world through two cone types, anchored near 429 nm blue and 555 nm yellow. PawVault shapes every surface and signal around that dichromatic palette, so contrast does the work that colour cannot.
               </p>
@@ -234,21 +238,23 @@ export default function Science() {
         </div>
       </section>
 
-      <section data-nav-theme="light" className="bg-mint py-20 text-pine">
+      <section data-nav-theme="light" className="relative z-10 -mt-10 rounded-t-[40px] bg-mint pt-20 pb-28 text-pine lg:-mt-14 lg:rounded-t-[56px]">
         <div className="section-shell mx-auto max-w-6xl">
           <p className="eyebrow text-pine/60">Chapter 02 and cognitive welfare</p>
           <div className="mt-3 grid gap-10 lg:grid-cols-[0.9fr_1.1fr]">
             <div className="lg:sticky lg:top-24 lg:self-start">
               <span className="font-display text-7xl font-bold text-pine/20">02</span>
-              <h3 className="mt-3 font-display text-4xl font-bold leading-tight sm:text-5xl">
+              <MaskedHeading as="h3" className="mt-3 font-display text-4xl font-bold leading-tight sm:text-5xl">
                 A lick is a reset button for the nervous system.
-              </h3>
-              <div className="mt-6 overflow-hidden rounded-3xl border-4 border-cream shadow-2xl shadow-pine/20">
-                <img
-                  src="/images/editorial-lick-dome-macro.webp"
-                  alt="Macro detail of the frozen lick dome"
-                  className="aspect-[4/3] w-full object-cover"
-                />
+              </MaskedHeading>
+              <div className="cuberto-card-media mt-6 overflow-hidden rounded-3xl border-4 border-cream shadow-2xl shadow-pine/20">
+                <ParallaxFrame>
+                  <img
+                    src="/images/editorial-lick-dome-macro.webp"
+                    alt="Macro detail of the frozen lick dome"
+                    className="cuberto-card-media-inner aspect-[4/3] w-full object-cover"
+                  />
+                </ParallaxFrame>
               </div>
             </div>
             <div className="space-y-6 pt-6">
@@ -276,21 +282,23 @@ export default function Science() {
         </div>
       </section>
 
-      <section data-nav-theme="light" className="bg-blush py-20 text-pine">
+      <section data-nav-theme="light" className="relative z-10 -mt-10 rounded-t-[40px] bg-blush pt-20 pb-28 text-pine lg:-mt-14 lg:rounded-t-[56px]">
         <div className="section-shell mx-auto max-w-6xl">
           <p className="eyebrow text-pine/60">Chapter 03 and the scent anchor</p>
-          <h3 className="mt-3 max-w-3xl font-display text-4xl font-bold leading-tight sm:text-5xl">
+          <MaskedHeading as="h3" className="mt-3 max-w-3xl font-display text-4xl font-bold leading-tight sm:text-5xl">
             Your smell calms him. A new smell wakes his nose back up.
-          </h3>
+          </MaskedHeading>
           <div className="mt-10 grid items-start gap-8 lg:grid-cols-12">
             <div className="lg:col-span-7">
-              <div className="relative overflow-hidden rounded-3xl border-4 border-cream shadow-2xl shadow-pine/20">
-                <img
-                  src="/images/editorial-botanical-scent.webp"
-                  alt="Botanical scent sources arranged for olfactory foraging"
-                  className="aspect-[16/10] w-full object-cover"
-                />
-                <div className="absolute bottom-4 left-4 flex items-center gap-2 rounded-full bg-cream/90 px-4 py-2 text-sm font-bold text-pine">
+              <div className="cuberto-card-media relative overflow-hidden rounded-3xl border-4 border-cream shadow-2xl shadow-pine/20">
+                <ParallaxFrame>
+                  <img
+                    src="/images/editorial-botanical-scent.webp"
+                    alt="Botanical scent sources arranged for olfactory foraging"
+                    className="cuberto-card-media-inner aspect-[16/10] w-full object-cover"
+                  />
+                </ParallaxFrame>
+                <div className="pointer-events-none absolute bottom-4 left-4 z-10 flex items-center gap-2 rounded-full bg-cream/90 px-4 py-2 text-sm font-bold text-pine">
                   <span className="[&>svg]:h-5 [&>svg]:w-5"><BotanicalLeafIcon /></span>
                   Olfactory dishabituation
                 </div>
@@ -334,13 +342,13 @@ export default function Science() {
         </div>
       </section>
 
-      <section data-nav-theme="light" className="bg-mint py-20 text-pine">
+      <section data-nav-theme="light" className="relative z-10 -mt-10 rounded-t-[40px] bg-mint pt-20 pb-28 text-pine lg:-mt-14 lg:rounded-t-[56px]">
         <div className="section-shell mx-auto max-w-6xl">
           <p className="eyebrow text-pine/60">Chapter 04 and the habituation rule</p>
           <div className="mt-3 grid items-end gap-8 lg:grid-cols-[1fr_auto]">
-            <h3 className="max-w-3xl font-display text-4xl font-bold leading-tight sm:text-5xl">
+            <MaskedHeading as="h3" className="max-w-3xl font-display text-4xl font-bold leading-tight sm:text-5xl">
               Seven days, then the sound goes quiet.
-            </h3>
+            </MaskedHeading>
             <span className="font-display text-7xl font-bold text-pine/20">04</span>
           </div>
           <p className="mt-5 max-w-3xl text-lg leading-relaxed text-pine/80">

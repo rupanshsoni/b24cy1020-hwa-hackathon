@@ -1,7 +1,8 @@
 "use client";
 
 import { useState } from "react";
-import { ChevronDownIcon } from "@/components/icons/PawVaultIcons";
+import { PlusIcon } from "@/components/icons/PawVaultIcons";
+import { MaskedHeading } from "@/components/MotionPrimitives";
 import { faqs } from "@/data/faqs";
 
 type Topic = "All" | "Puzzles and Safety" | "Audio and Tech" | "Orders and Mission";
@@ -28,12 +29,18 @@ export default function Faq() {
     .filter(({ index }) => topic === "All" || topicByIndex[index] === topic);
 
   return (
-    <section id="faq" data-nav-theme="light" className="scroll-mt-24 bg-[#EFE3CF] py-20">
+    <section
+      id="faq"
+      data-nav-theme="light"
+      className="-mt-10 scroll-mt-24 rounded-t-[40px] bg-[#EFE3CF] pt-24 pb-28 lg:-mt-14 lg:rounded-t-[56px]"
+    >
       <div className="section-shell">
         <div className="grid gap-10 lg:grid-cols-[0.8fr_1.2fr]">
           <div>
             <p className="eyebrow">Good questions</p>
-            <h2 className="display-title mt-3">Everything you might ask.</h2>
+            <MaskedHeading as="h2" className="display-title mt-3">
+              Everything you might ask.
+            </MaskedHeading>
             <p className="mt-4 text-cocoa/65">Still curious? The contact form below reaches a real human.</p>
             <div className="mt-8 flex flex-wrap gap-2">
               {topics.map((item) => (
@@ -71,15 +78,17 @@ export default function Faq() {
                       {String(index + 1).padStart(2, "0")}
                     </span>
                     <span className="flex-1 font-semibold text-cocoa">{question}</span>
-                    <ChevronDownIcon
-                      className={`mt-0.5 h-5 w-5 shrink-0 text-pine transition-transform ${
-                        isOpen ? "rotate-180" : ""
+                    <PlusIcon
+                      className={`mt-0.5 h-5 w-5 shrink-0 text-pine transition-transform duration-500 ease-out ${
+                        isOpen ? "rotate-45" : ""
                       }`}
                     />
                   </button>
-                  {isOpen && (
-                    <p className="pb-5 pl-14 pr-8 text-sm leading-relaxed text-cocoa/70">{answer}</p>
-                  )}
+                  <div className="cuberto-accordion" data-open={isOpen ? true : false}>
+                    <div className="cuberto-accordion-inner">
+                      <p className="pb-5 pl-14 pr-8 text-sm leading-relaxed text-cocoa/70">{answer}</p>
+                    </div>
+                  </div>
                 </div>
               );
             })}

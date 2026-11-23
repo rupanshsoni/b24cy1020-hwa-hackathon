@@ -1,7 +1,9 @@
 "use client";
 
 import { useCallback, useEffect, useRef, useState } from "react";
+import gsap from "gsap";
 import Link from "next/link";
+import { MaskedHeading } from "@/components/MotionPrimitives";
 import { useStore } from "@/store/StoreContext";
 import {
   ScratchPadIcon,
@@ -55,6 +57,14 @@ function StageIcon({ kind, className }: { kind: StageInfo["icon"]; className?: s
 
 const confettiColors = ["#4DA8DA", "#F5C942", "#F4B8C4"];
 
+function pointerAngle(e: React.PointerEvent<HTMLDivElement>) {
+  const rect = e.currentTarget.getBoundingClientRect();
+  return Math.atan2(
+    e.clientY - (rect.top + rect.height / 2),
+    e.clientX - (rect.left + rect.width / 2),
+  );
+}
+
 export default function TryPawVault() {
   const { dogName, applyPromo, openCart } = useStore();
 
@@ -73,8 +83,26 @@ export default function TryPawVault() {
 
   const audioRef = useRef<AudioContext | null>(null);
   const stageRef = useRef<HTMLDivElement>(null);
+  const stageContentRef = useRef<HTMLDivElement>(null);
   const ballRef = useRef<HTMLDivElement>(null);
   const funnelRef = useRef<HTMLDivElement>(null);
+  const playfieldRef = useRef<HTMLDivElement>(null);
+  const dragOriginRef = useRef<{
+    pointerX: number;
+    pointerY: number;
+    startX: number;
+    startY: number;
+    moved: boolean;
+    minX: number;
+    maxX: number;
+    minY: number;
+    maxY: number;
+    restCenterX: number;
+    restCenterY: number;
+  } | null>(null);
+  const ballDroppedRef = useRef(false);
+  const justDraggedRef = useRef(false);
+  const ballPointerId = useRef<number | null>(null);
   const lastTurn = useRef(0);
   const toastTimer = useRef<number | null>(null);
   const stageTimer = useRef<number | null>(null);
@@ -85,6 +113,33 @@ export default function TryPawVault() {
   useEffect(() => {
     setDragging(false);
     lastTurn.current = 0;
+    if (stage !== 1) {
+      ballDroppedRef.current = false;
+      dragOriginRef.current = null;
+      justDraggedRef.current = false;
+      ballPointerId.current = null;
+    }
+  }, [stage]);
+
+  useEffect(() => {
+    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+    const node = stageContentRef.current;
+    if (!node) return;
+    const ctx = gsap.context(() => {
+      gsap.fromTo(
+        node,
+        { autoAlpha: 0, y: 18, scale: 0.97 },
+        {
+          autoAlpha: 1,
+          y: 0,
+          scale: 1,
+          duration: 0.55,
+          ease: "expo.out",
+          clearProps: "transform,opacity,visibility",
+        },
+      );
+    }, node);
+    return () => ctx.revert();
   }, [stage]);
 
   const speak = useCallback((kind: Feedback) => {
@@ -173,8 +228,28 @@ export default function TryPawVault() {
     }
   }, [completeStage, padLocked, speak, stage]);
 
+  const pointInFunnel = useCallback((cx: number, cy: number, padding: number) => {
+    const f = funnelRef.current?.getBoundingClientRect();
+    if (!f) return false;
+    return (
+      cx >= f.left - padding &&
+      cx <= f.right + padding &&
+      cy >= f.top - padding &&
+      cy <= f.bottom + padding
+    );
+  }, []);
+
   const dropBall = useCallback(() => {
-    if (stage !== 1 || ballIn) return;
+    if (stage !== 1 || ballIn || ballDroppedRef.current) return;
+    ballDroppedRef.current = true;
+    const ball = ballRef.current;
+    if (ball && ball.hasPointerCapture) {
+      const id = dragOriginRef.current ? ballPointerId.current : null;
+      if (id !== null && ball.hasPointerCapture(id)) ball.releasePointerCapture(id);
+    }
+    dragOriginRef.current = null;
+    justDraggedRef.current = false;
+    setDragging(false);
     setBallIn(true);
     setBallPos({ x: 0, y: 0 });
     completeStage(2, "Seesaw tipped. Kibble treats are bouncing out!", false);
@@ -205,44 +280,152 @@ export default function TryPawVault() {
     if (next >= 12) completeStage(5, `${dogName} is calm and happy!`, true);
   }, [completeStage, dogName, speak, stage]);
 
+  const onBallDown = useCallback(
+    (e: React.PointerEvent<HTMLDivElement>) => {
+      if (stage !== 1 || ballIn || ballDroppedRef.current) return;
+      e.preventDefault();
+      e.currentTarget.setPointerCapture(e.pointerId);
+      ballPointerId.current = e.pointerId;
+
+      const ballRect = ballRef.current?.getBoundingClientRect();
+      const fieldRect = playfieldRef.current?.getBoundingClientRect();
+      if (!ballRect || !fieldRect) return;
+
+      const restingLeft = ballRect.left - ballPos.x;
+      const restingTop = ballRect.top - ballPos.y;
+      dragOriginRef.current = {
+        pointerX: e.clientX,
+        pointerY: e.clientY,
+        startX: ballPos.x,
+        startY: ballPos.y,
+        moved: false,
+        minX: fieldRect.left - restingLeft,
+        maxX: fieldRect.right - ballRect.width - restingLeft,
+        minY: fieldRect.top - restingTop,
+        maxY: fieldRect.bottom - ballRect.height - restingTop,
+        restCenterX: restingLeft + ballRect.width / 2,
+        restCenterY: restingTop + ballRect.height / 2,
+      };
+      setDragging(true);
+    },
+    [ballIn, ballPos.x, ballPos.y, stage],
+  );
+
   const onBallMove = useCallback(
-    (e: React.PointerEvent) => {
-      if (!dragging || stage !== 1) return;
-      const funnel = funnelRef.current?.getBoundingClientRect();
-      const ball = ballRef.current?.getBoundingClientRect();
-      if (!funnel || !ball) return;
-      setBallPos({
-        x: e.clientX - ball.left - ball.width / 2,
-        y: e.clientY - ball.top - ball.height / 2,
-      });
-      const bx = e.clientX;
-      const by = e.clientY;
-      if (
-        bx >= funnel.left - 20 &&
-        bx <= funnel.right + 20 &&
-        by >= funnel.top - 20 &&
-        by <= funnel.bottom + 20
-      ) {
+    (e: React.PointerEvent<HTMLDivElement>) => {
+      const origin = dragOriginRef.current;
+      if (!origin || stage !== 1 || ballDroppedRef.current) return;
+
+      const dx = e.clientX - origin.pointerX;
+      const dy = e.clientY - origin.pointerY;
+      if (Math.abs(dx) > 6 || Math.abs(dy) > 6) origin.moved = true;
+
+      const nextX = Math.max(origin.minX, Math.min(origin.maxX, origin.startX + dx));
+      const nextY = Math.max(origin.minY, Math.min(origin.maxY, origin.startY + dy));
+      setBallPos({ x: nextX, y: nextY });
+
+      const centerX = origin.restCenterX + nextX;
+      const centerY = origin.restCenterY + nextY;
+      if (pointInFunnel(centerX, centerY, 36) || pointInFunnel(e.clientX, e.clientY, 36)) {
+        const ball = ballRef.current;
+        if (ball && ballPointerId.current !== null && ball.hasPointerCapture(ballPointerId.current)) {
+          ball.releasePointerCapture(ballPointerId.current);
+        }
+        ballPointerId.current = null;
         dropBall();
       }
     },
-    [dragging, dropBall, stage],
+    [dropBall, pointInFunnel, stage],
+  );
+
+  const onBallUp = useCallback(
+    (e: React.PointerEvent<HTMLDivElement>) => {
+      const ball = ballRef.current;
+      if (ball && ball.hasPointerCapture(e.pointerId)) ball.releasePointerCapture(e.pointerId);
+      ballPointerId.current = null;
+
+      const origin = dragOriginRef.current;
+      dragOriginRef.current = null;
+      setDragging(false);
+      if (stage !== 1 || ballDroppedRef.current) return;
+
+      const f = funnelRef.current?.getBoundingClientRect();
+      const finalX = origin
+        ? Math.max(origin.minX, Math.min(origin.maxX, e.clientX - origin.pointerX))
+        : 0;
+      const finalY = origin
+        ? Math.max(origin.minY, Math.min(origin.maxY, e.clientY - origin.pointerY))
+        : 0;
+      const centerX = origin ? origin.restCenterX + finalX : e.clientX;
+      const centerY = origin ? origin.restCenterY + finalY : e.clientY;
+      const funnelCenterX = f ? f.left + f.width / 2 : Number.POSITIVE_INFINITY;
+      const funnelCenterY = f ? f.top + f.height / 2 : Number.POSITIVE_INFINITY;
+      const nearCenter = Math.hypot(e.clientX - funnelCenterX, e.clientY - funnelCenterY) <= 60;
+
+      if (
+        !origin?.moved ||
+        nearCenter ||
+        Math.hypot(centerX - funnelCenterX, centerY - funnelCenterY) <= 60 ||
+        pointInFunnel(centerX, centerY, 36) ||
+        pointInFunnel(e.clientX, e.clientY, 36)
+      ) {
+        dropBall();
+        return;
+      }
+
+      justDraggedRef.current = true;
+      setBallPos({ x: 0, y: 0 });
+    },
+    [dropBall, pointInFunnel, stage],
+  );
+
+  const onBallCancel = useCallback(
+    (e: React.PointerEvent<HTMLDivElement>) => {
+      const ball = ballRef.current;
+      if (ball && ball.hasPointerCapture(e.pointerId)) ball.releasePointerCapture(e.pointerId);
+      ballPointerId.current = null;
+      dragOriginRef.current = null;
+      setDragging(false);
+      setBallPos({ x: 0, y: 0 });
+    },
+    [],
+  );
+
+  const onWheelDown = useCallback(
+    (e: React.PointerEvent<HTMLDivElement>) => {
+      e.currentTarget.setPointerCapture(e.pointerId);
+      lastTurn.current = pointerAngle(e);
+      setDragging(true);
+    },
+    [],
   );
 
   const onWheelMove = useCallback(
     (e: React.PointerEvent<HTMLDivElement>) => {
       if (!dragging || stage !== 3) return;
-      const rect = e.currentTarget.getBoundingClientRect();
-      const angle = Math.atan2(
-        e.clientY - (rect.top + rect.height / 2),
-        e.clientX - (rect.left + rect.width / 2),
-      );
+      const angle = pointerAngle(e);
       if (Math.abs(angle - lastTurn.current) > 0.6) {
         lastTurn.current = angle;
         spinWheel();
       }
     },
     [dragging, spinWheel, stage],
+  );
+
+  const endPointerCapture = useCallback((e: React.PointerEvent<HTMLDivElement>) => {
+    if (e.currentTarget.hasPointerCapture(e.pointerId)) {
+      e.currentTarget.releasePointerCapture(e.pointerId);
+    }
+    setDragging(false);
+  }, []);
+
+  const onLickDown = useCallback(
+    (e: React.PointerEvent<HTMLDivElement>) => {
+      e.currentTarget.setPointerCapture(e.pointerId);
+      setDragging(true);
+      lick();
+    },
+    [lick],
   );
 
   const playAgain = useCallback(() => {
@@ -263,6 +446,10 @@ export default function TryPawVault() {
     setToast("");
     setDragging(false);
     setBallPos({ x: 0, y: 0 });
+    ballDroppedRef.current = false;
+    dragOriginRef.current = null;
+    justDraggedRef.current = false;
+    ballPointerId.current = null;
     lastTurn.current = 0;
   }, []);
 
@@ -295,7 +482,9 @@ export default function TryPawVault() {
       <div className="section-shell">
         <div className="mx-auto max-w-2xl text-center">
           <p className="eyebrow">Try PawVault yourself</p>
-          <h2 className="display-title mt-3">Five puzzles. Can you calm {dogName}?</h2>
+          <MaskedHeading as="h2" className="display-title mt-3">
+            Five puzzles. Can you calm {dogName}?
+          </MaskedHeading>
           <p className="mt-4 text-cocoa/65">
             Play through the same sequence a dog experiences. Drag, swipe or simply click. Every
             interaction is accessible, with gentle synthesized feedback.
@@ -328,7 +517,7 @@ export default function TryPawVault() {
               </span>
             </div>
 
-            <div className="mt-8 grid min-h-[320px] place-items-center">
+            <div ref={stageContentRef} className="mt-8 grid min-h-[320px] place-items-center">
               {stage === 0 && (
                 <div className="text-center">
                   <button
@@ -364,39 +553,67 @@ export default function TryPawVault() {
               )}
 
               {stage === 1 && (
-                <div className="relative h-64 w-full max-w-md">
-                  <div
-                    ref={funnelRef}
-                    className="absolute left-1/2 top-2 h-24 w-24 -translate-x-1/2"
-                  >
-                    <FunnelTargetSvg className="h-full w-full" />
-                  </div>
-                  <div
-                    ref={ballRef}
-                    role="button"
-                    tabIndex={0}
-                    aria-label="Drag or press the rubber ball into the funnel"
-                    onPointerDown={() => {
-                      setDragging(true);
-                    }}
-                    onPointerMove={onBallMove}
-                    onPointerUp={() => setDragging(false)}
-                    onClick={dropBall}
-                    onKeyDown={(e) => {
-                      if (e.key === "Enter" || e.key === " ") dropBall();
-                    }}
-                    className="absolute bottom-6 left-1/2 grid h-16 w-16 cursor-grab place-items-center active:cursor-grabbing"
-                    style={{
-                      transform: `translate(calc(-50% + ${ballPos.x}px), ${ballPos.y}px)`,
-                    }}
-                  >
-                    <RubberBallSvg className={`pointer-events-none h-full w-full ${dragging ? "drop-shadow-lg" : ""}`} />
-                  </div>
-                  {ballIn && (
-                    <div className="fade-up absolute bottom-2 right-4">
-                      <KibbleClusterSvg className="h-20 w-32" />
+                <div className="w-full max-w-md text-center">
+                  <div ref={playfieldRef} className="relative h-64 w-full">
+                    <div
+                      ref={funnelRef}
+                      role="button"
+                      tabIndex={0}
+                      aria-label="Drop ball into funnel"
+                      onClick={dropBall}
+                      onKeyDown={(e) => {
+                        if (e.key === "Enter" || e.key === " ") {
+                          e.preventDefault();
+                          dropBall();
+                        }
+                      }}
+                      className="absolute left-1/2 top-2 h-24 w-24 -translate-x-1/2 cursor-pointer rounded-2xl focus:outline-none focus:ring-4 focus:ring-sky-led/40"
+                    >
+                      <FunnelTargetSvg className="h-full w-full" />
                     </div>
-                  )}
+                    <div
+                      ref={ballRef}
+                      role="button"
+                      tabIndex={0}
+                      data-cursor="drag"
+                      aria-label="Drag or press the rubber ball into the funnel"
+                      onPointerDown={onBallDown}
+                      onPointerMove={onBallMove}
+                      onPointerUp={onBallUp}
+                      onPointerCancel={onBallCancel}
+                      onClick={() => {
+                        if (justDraggedRef.current) {
+                          justDraggedRef.current = false;
+                          return;
+                        }
+                        dropBall();
+                      }}
+                      onKeyDown={(e) => {
+                        if (e.key === "Enter" || e.key === " ") dropBall();
+                      }}
+                      className={`absolute bottom-6 left-1/2 grid h-16 w-16 touch-none select-none place-items-center active:cursor-grabbing ${
+                        dragging ? "cursor-grabbing" : "cursor-grab transition-transform duration-300 ease-out"
+                      } ${ballIn ? "pointer-events-none scale-75 opacity-0" : ""}`}
+                      style={{
+                        transform: `translate(calc(-50% + ${ballPos.x}px), ${ballPos.y}px)`,
+                      }}
+                    >
+                      <RubberBallSvg className={`pointer-events-none h-full w-full ${dragging ? "drop-shadow-lg" : ""}`} />
+                    </div>
+                    {ballIn && (
+                      <div className="fade-up absolute bottom-2 right-4">
+                        <KibbleClusterSvg className="h-20 w-32" />
+                      </div>
+                    )}
+                  </div>
+                  <button
+                    type="button"
+                    onClick={dropBall}
+                    disabled={ballIn}
+                    className="btn-ghost mt-4"
+                  >
+                    Drop ball into funnel
+                  </button>
                 </div>
               )}
 
@@ -434,17 +651,17 @@ export default function TryPawVault() {
                   <div
                     role="button"
                     tabIndex={0}
+                    data-cursor="drag"
                     aria-label="Spin the forage wheel"
-                    onPointerDown={() => {
-                      setDragging(true);
-                    }}
+                    onPointerDown={onWheelDown}
                     onPointerMove={onWheelMove}
-                    onPointerUp={() => setDragging(false)}
+                    onPointerUp={endPointerCapture}
+                    onPointerCancel={endPointerCapture}
                     onClick={spinWheel}
                     onKeyDown={(e) => {
                       if (e.key === "Enter" || e.key === " ") spinWheel();
                     }}
-                    className="mx-auto h-40 w-40 cursor-grab rounded-full shadow-soft active:cursor-grabbing"
+                    className="mx-auto h-40 w-40 cursor-grab touch-none select-none rounded-full shadow-soft active:cursor-grabbing"
                   >
                     <ForageWheelSvg className="pointer-events-none h-full w-full" rotation={wheelTurns * 45} />
                   </div>
@@ -464,20 +681,19 @@ export default function TryPawVault() {
                   <div
                     role="button"
                     tabIndex={0}
+                    data-cursor="drag"
                     aria-label="Rub the frozen lick dome"
-                    onPointerDown={() => {
-                      setDragging(true);
-                      lick();
-                    }}
+                    onPointerDown={onLickDown}
                     onPointerMove={(e) => {
                       if (dragging) lick();
                     }}
-                    onPointerUp={() => setDragging(false)}
+                    onPointerUp={endPointerCapture}
+                    onPointerCancel={endPointerCapture}
                     onClick={lick}
                     onKeyDown={(e) => {
                       if (e.key === "Enter" || e.key === " ") lick();
                     }}
-                    className="mx-auto h-44 w-56 cursor-pointer drop-shadow-sm"
+                    className="mx-auto h-44 w-56 cursor-pointer touch-none select-none drop-shadow-sm"
                   >
                     <LickDomeSvg licks={licks} className="pointer-events-none h-full w-full" />
                   </div>

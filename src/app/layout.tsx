@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Fraunces, Figtree } from "next/font/google";
 import { StoreProvider } from "@/store/StoreContext";
+import LoadingScreen from "@/components/LoadingScreen";
 import SmoothScrollProvider from "@/components/SmoothScrollProvider";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
@@ -33,6 +34,7 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
     <html lang="en" className={`${fraunces.variable} ${figtree.variable}`}>
       <body>
         <StoreProvider>
+          <LoadingScreen />
           <SmoothScrollProvider>
             <Navbar />
             {children}

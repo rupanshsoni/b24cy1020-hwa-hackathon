@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { MailIcon, ClockIcon, ArrowRightIcon } from "@/components/icons/PawVaultIcons";
+import { MaskedHeading, CubertoButton } from "@/components/MotionPrimitives";
 
 export default function Contact() {
   const [form, setForm] = useState({ name: "", email: "", message: "" });
@@ -43,13 +44,13 @@ export default function Contact() {
     <section
       id="contact"
       data-nav-theme="dark"
-      className="relative z-10 -mt-10 scroll-mt-24 rounded-t-[40px] bg-[#12352E] py-20 pb-24 text-cream lg:-mt-14 lg:rounded-t-[56px]"
+      className="relative z-10 -mt-10 scroll-mt-24 rounded-t-[40px] bg-[#12352E] pt-24 pb-28 text-cream lg:-mt-14 lg:rounded-t-[56px]"
     >
       <div className="section-shell">
         <div className="card-dark grid gap-10 overflow-hidden p-8 sm:p-12 lg:grid-cols-2">
           <div>
             <p className="eyebrow">Say hello</p>
-            <h2 className="display-title mt-3 font-display">We reply within one working day.</h2>
+            <MaskedHeading as="h2" className="display-title mt-3 font-display">We reply within one working day.</MaskedHeading>
             <p className="mt-4 max-w-md text-cream/70">
               Questions about sizing, scents, or which version suits your dog? Send a note. A real person reads every message.
             </p>
@@ -81,10 +82,10 @@ export default function Contact() {
               {errors.message && <p className="mt-1 text-xs text-[#FFB4A9]">{errors.message}</p>}
             </div>
             <div className="flex flex-wrap items-center gap-4">
-              <button type="submit" disabled={sending} className="btn-primary btn-magnetic inline-flex items-center gap-2">
+              <CubertoButton type="submit" disabled={sending} variant="primary" className="inline-flex items-center gap-2">
                 <span>{sending ? "Sending..." : "Send message"}</span>
                 <ArrowRightIcon className="h-4 w-4" />
-              </button>
+              </CubertoButton>
               {status && <p className={`text-sm font-semibold ${ok ? "text-[#A8E0B0]" : "text-[#FFB4A9]"}`}>{status}</p>}
             </div>
           </form>

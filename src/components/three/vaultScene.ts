@@ -17,16 +17,23 @@ export interface SceneHandle {
 }
 
 const PRESETS: Record<string, [number, number, number]> = {
-  scratch: [0, 1.1, 5.2],
-  lick: [3.6, 4.2, 5.4],
-  seesaw: [-5.2, 2.4, 5.0],
-  paddle: [3.8, 1.7, 5.6],
-  wheel: [5.4, 2.0, 4.4],
-  scent: [-4.4, 2.6, -5.2],
-  default: [4.6, 3.4, 6.4],
+  scratch: [0, 1.15, 4.8],
+  lick: [2.8, 4.1, 5.2],
+  seesaw: [-4.6, 2.2, 4.8],
+  paddle: [2.2, 1.5, 5.2],
+  wheel: [4.8, 1.6, 4.6],
+  scent: [-3.2, 2.0, -5.2],
+  default: [3.4, 2.8, 6.2],
 };
 
-const LOOK_Y: Record<string, number> = { lick: 2.2, scratch: 0.7 };
+const LOOK_Y: Record<string, number> = {
+  scratch: 0.55,
+  lick: 2.35,
+  seesaw: 1.25,
+  paddle: 0.75,
+  wheel: 0.65,
+  scent: 0.85,
+};
 
 function sphericalOf(pos: THREE.Vector3, look: THREE.Vector3) {
   const dx = pos.x - look.x;
@@ -36,6 +43,48 @@ function sphericalOf(pos: THREE.Vector3, look: THREE.Vector3) {
   const azimuth = Math.atan2(dx, dz);
   const polar = Math.acos(THREE.MathUtils.clamp(dy / radius, -1, 1));
   return { radius, azimuth, polar };
+}
+
+function createStudioEnvironment(renderer: THREE.WebGLRenderer): THREE.WebGLRenderTarget {
+  const pmrem = new THREE.PMREMGenerator(renderer);
+  pmrem.compileEquirectangularShader();
+
+  const envScene = new THREE.Scene();
+  envScene.background = new THREE.Color(0x1a2e29);
+
+  const panelGeo = new THREE.PlaneGeometry(1, 1);
+  const panels: Array<{
+    pos: [number, number, number];
+    rot: [number, number, number];
+    scale: [number, number, number];
+    color: number;
+    intensity: number;
+  }> = [
+    { pos: [0, 8, 0], rot: [Math.PI / 2, 0, 0], scale: [12, 12, 1], color: 0xfff8ee, intensity: 2.4 },
+    { pos: [-8, 4, 4], rot: [0, Math.PI / 2.4, 0], scale: [10, 8, 1], color: 0xf2f8ff, intensity: 2.0 },
+    { pos: [8, 3, 5], rot: [0, -Math.PI / 2.6, 0], scale: [8, 7, 1], color: 0xfff1df, intensity: 1.4 },
+    { pos: [0, -6, 0], rot: [-Math.PI / 2, 0, 0], scale: [14, 14, 1], color: 0xe6dac6, intensity: 0.85 },
+  ];
+
+  const mats: THREE.MeshBasicMaterial[] = [];
+  for (const p of panels) {
+    const m = new THREE.MeshBasicMaterial({
+      color: new THREE.Color(p.color).multiplyScalar(p.intensity),
+      side: THREE.DoubleSide,
+    });
+    mats.push(m);
+    const mesh = new THREE.Mesh(panelGeo, m);
+    mesh.position.set(...p.pos);
+    mesh.rotation.set(...p.rot);
+    mesh.scale.set(...p.scale);
+    envScene.add(mesh);
+  }
+
+  const envRT = pmrem.fromScene(envScene, 0.04);
+  panelGeo.dispose();
+  mats.forEach((m) => m.dispose());
+  pmrem.dispose();
+  return envRT;
 }
 
 export function createVaultScene(container: HTMLElement): SceneHandle {
@@ -49,27 +98,44 @@ export function createVaultScene(container: HTMLElement): SceneHandle {
   renderer.shadowMap.type = THREE.PCFSoftShadowMap;
   renderer.outputColorSpace = THREE.SRGBColorSpace;
   renderer.toneMapping = THREE.ACESFilmicToneMapping;
-  renderer.toneMappingExposure = 1.1;
+  renderer.toneMappingExposure = 1.08;
   container.appendChild(renderer.domElement);
 
   const scene = new THREE.Scene();
+  const envRT = createStudioEnvironment(renderer);
+  scene.environment = envRT.texture;
+  scene.environmentIntensity = 0.52;
+
   const camera = new THREE.PerspectiveCamera(38, width / height, 0.1, 100);
 
-  const hemi = new THREE.HemisphereLight(0xffffff, 0xd6c7b4, 2.2);
+  const hemi = new THREE.HemisphereLight(0xfffaf2, 0x8fa89e, 1.35);
   scene.add(hemi);
 
-  const key = new THREE.DirectionalLight(0xfff3df, 2.2);
-  key.position.set(5, 9, 7);
+  const key = new THREE.DirectionalLight(0xfff4e4, 1.85);
+  key.position.set(4.5, 8.5, 6.5);
   key.castShadow = true;
   key.shadow.mapSize.set(1024, 1024);
+  key.shadow.camera.near = 1;
+  key.shadow.camera.far = 22;
+  key.shadow.camera.left = -3.2;
+  key.shadow.camera.right = 3.2;
+  key.shadow.camera.top = 4.8;
+  key.shadow.camera.bottom = -1.5;
+  key.shadow.bias = -0.0004;
+  key.shadow.normalBias = 0.02;
+  key.shadow.radius = 3;
   scene.add(key);
 
-  const fill = new THREE.DirectionalLight(SKY, 0.55);
-  fill.position.set(-6, 3, -5);
+  const fill = new THREE.DirectionalLight(0xd8eef8, 0.65);
+  fill.position.set(-5.5, 3.5, 4.0);
   scene.add(fill);
 
+  const rim = new THREE.DirectionalLight(0xfff0dc, 0.85);
+  rim.position.set(-4.0, 5.0, -6.0);
+  scene.add(rim);
+
   const floorGeo = new THREE.CircleGeometry(7, 60);
-  const floorMat = new THREE.ShadowMaterial({ opacity: 0.32 });
+  const floorMat = new THREE.ShadowMaterial({ opacity: 0.36 });
   const floor = new THREE.Mesh(floorGeo, floorMat);
   floor.rotation.x = -Math.PI / 2;
   floor.position.y = -0.35;
@@ -77,7 +143,7 @@ export function createVaultScene(container: HTMLElement): SceneHandle {
   scene.add(floor);
 
   const pivot = new THREE.Group();
-  pivot.position.y = -0.3;
+  pivot.position.y = -0.35;
   const explosion = new THREE.Group();
   const rig = buildPawVaultModel();
   explosion.add(rig.group);
@@ -87,12 +153,14 @@ export function createVaultScene(container: HTMLElement): SceneHandle {
   let active: PartKey | null = null;
   let explodeTarget = 0;
   let explodeCurrent = 0;
-  let dogVision = false;
 
-  const lookCurrent = new THREE.Vector3(0, 1.3, 0);
-  const targetLook = new THREE.Vector3(0, 1.3, 0);
+  const lookCurrent = new THREE.Vector3(0, 1.35, 0);
+  const targetLook = new THREE.Vector3(0, 1.35, 0);
 
-  const base = sphericalOf(new THREE.Vector3(...PRESETS.default), new THREE.Vector3(0, 1.3, 0));
+  const base = sphericalOf(
+    new THREE.Vector3(...PRESETS.default),
+    new THREE.Vector3(0, 1.35, 0),
+  );
   const target = { ...base };
   const current = { ...base };
 
@@ -152,15 +220,28 @@ export function createVaultScene(container: HTMLElement): SceneHandle {
 
   function setTargetFor(keyName: string) {
     const pos = new THREE.Vector3(...(PRESETS[keyName] ?? PRESETS.default));
-    let ly = LOOK_Y[keyName] ?? (keyName === "default" ? 1.3 : 1.4);
-    if (explodeTarget > 0.5) ly += 0.75;
+    let ly = LOOK_Y[keyName] ?? (keyName === "default" ? 1.35 : 1.4);
+    if (explodeTarget > 0.5) ly += 0.85;
     const look = new THREE.Vector3(0, ly, 0);
     const s = sphericalOf(pos, look);
     target.radius = s.radius;
-    if (explodeTarget > 0.5) target.radius += 1.9;
+    if (explodeTarget > 0.5) target.radius += 2.1;
     target.azimuth = s.azimuth;
     target.polar = clampPolar(s.polar);
     targetLook.copy(look);
+  }
+
+  function applyHighlight() {
+    const meshes = rig.highlightMeshes ?? [];
+    for (const hm of meshes) {
+      const mat = hm.mesh?.material as THREE.MeshStandardMaterial | undefined;
+      if (mat && "emissive" in mat) {
+        const on = active !== null && hm.part === active;
+        if (on) mat.emissive.copy(hm.base).multiplyScalar(0.32);
+        else mat.emissive.setHex(0x000000);
+        mat.emissiveIntensity = on ? 0.55 * explodeTarget + 0.14 : 0;
+      }
+    }
   }
 
   setTargetFor("default");
@@ -221,25 +302,17 @@ export function createVaultScene(container: HTMLElement): SceneHandle {
       rig.setVersion?.(v);
     },
     setDogVision(on) {
-      dogVision = on;
       rig.setDogVision?.(on);
+      applyHighlight();
     },
     setShellColor(hex) {
       rig.setShellColor?.(hex);
+      applyHighlight();
     },
     setActive(k, amount) {
       active = k;
       explodeTarget = amount;
-      const meshes = rig.highlightMeshes ?? [];
-      for (const hm of meshes) {
-        const mat = hm.mesh?.material as THREE.MeshStandardMaterial | undefined;
-        if (mat && "emissive" in mat) {
-          const on = k !== null && hm.part === k;
-          if (on) mat.emissive.copy(hm.base).multiplyScalar(0.35);
-          else mat.emissive.setHex(0x000000);
-          mat.emissiveIntensity = on ? 0.6 * amount + 0.15 : 0;
-        }
-      }
+      applyHighlight();
       setTargetFor(k ?? "default");
       if (prefersReduced) {
         current.radius = Math.max(target.radius, minRadius());
@@ -261,6 +334,7 @@ export function createVaultScene(container: HTMLElement): SceneHandle {
       window.removeEventListener("pointermove", onPointerMove);
       window.removeEventListener("pointerup", onPointerUp);
       rig.disposeTextures();
+      envRT.dispose();
       scene.traverse((obj) => {
         const mesh = obj as THREE.Mesh;
         if (mesh.geometry) mesh.geometry.dispose();

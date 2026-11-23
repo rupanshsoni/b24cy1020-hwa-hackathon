@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useRef, useState } from "react";
+import { CubertoButton, MaskedHeading, RevealStagger } from "@/components/MotionPrimitives";
 import { CheckIcon, StarIcon } from "@/components/icons/PawVaultIcons";
 import { initialReviews, type Review } from "@/data/reviews";
 import { useStore } from "@/store/StoreContext";
@@ -71,7 +72,9 @@ export default function Reviews() {
         <div className="flex flex-wrap items-end justify-between gap-6">
           <div>
             <p className="eyebrow">From real homes</p>
-            <h2 className="display-title mt-3">Happy dogs, happy humans.</h2>
+            <MaskedHeading as="h2" className="display-title mt-3">
+              Happy dogs, happy humans.
+            </MaskedHeading>
           </div>
           <div className="flex items-center gap-3 rounded-2xl bg-white/45 px-5 py-3">
             <span className="font-display text-4xl font-bold tnum">{average}</span>
@@ -105,21 +108,27 @@ export default function Reviews() {
           ))}
         </div>
 
-        <div className="mt-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-          {visible.map((review) => (
-            <article key={review.id} className="rounded-2xl bg-[#F7EFE2] p-6 shadow-sm">
-              <div className="flex items-center justify-between gap-3">
-                <Stars rating={review.rating} />
-                <span className="chip text-[10px]">{review.version}</span>
-              </div>
-              <h3 className="mt-3 font-display text-lg font-bold">{review.title}</h3>
-              <p className="mt-2 text-sm leading-relaxed text-cocoa/65">{review.body}</p>
-              <p className="mt-4 text-xs font-semibold text-cocoa/50">
-                {review.name} | {review.dog} | {review.date}
-              </p>
-            </article>
+        <RevealStagger className="mt-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+          {visible.map((review, i) => (
+            <div key={review.id}>
+              <article
+                className={`h-full rounded-2xl bg-[#F7EFE2] p-6 shadow-sm transition-all duration-500 ease-out hover:-translate-y-1.5 hover:rotate-0 hover:shadow-md ${
+                  i % 3 === 2 ? "lg:-rotate-1" : i % 3 === 1 ? "lg:rotate-1" : ""
+                }`}
+              >
+                <div className="flex items-center justify-between gap-3">
+                  <Stars rating={review.rating} />
+                  <span className="chip text-[10px]">{review.version}</span>
+                </div>
+                <h3 className="mt-3 font-display text-lg font-bold">{review.title}</h3>
+                <p className="mt-2 text-sm leading-relaxed text-cocoa/65">{review.body}</p>
+                <p className="mt-4 text-xs font-semibold text-cocoa/50">
+                  {review.name} | {review.dog} | {review.date}
+                </p>
+              </article>
+            </div>
           ))}
-        </div>
+        </RevealStagger>
 
         <form onSubmit={submit} className="mt-10 grid gap-4 rounded-2xl bg-[#F7EFE2] p-6 shadow-sm sm:grid-cols-2 sm:p-8">
           <div className="sm:col-span-2">
@@ -170,7 +179,7 @@ export default function Reviews() {
             <input id="review-body" value={form.body} onChange={(e) => setForm({ ...form, body: e.target.value })} className="field" placeholder="What changed for your dog?" />
           </div>
           <div className="flex flex-wrap items-center gap-4 sm:col-span-2">
-            <button type="submit" className="btn-primary btn-magnetic">Post review</button>
+            <CubertoButton type="submit" variant="primary">Post review</CubertoButton>
             {message && (
               <p className="inline-flex items-center gap-2 text-sm font-semibold text-emerald-700" role="status">
                 <CheckIcon className="h-4 w-4" />

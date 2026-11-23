@@ -1,5 +1,9 @@
+"use client";
+
 import Link from "next/link";
-import { PawIcon } from "@/components/icons/PawVaultIcons";
+import { useEffect, useRef, useState } from "react";
+import { PawIcon, MailIcon } from "@/components/icons/PawVaultIcons";
+import { CubertoButton } from "@/components/MotionPrimitives";
 
 const exploreLinks = [
   { href: "/#configure", label: "Configure yours" },
@@ -16,7 +20,38 @@ const helpLinks = [
   { href: "/#how-it-works", label: "How it works" },
 ];
 
+const promoCodes = [
+  {
+    code: "GOODBOY15",
+    offer: "15% off",
+    tone: "group border-butter/50 text-butter hover:text-cocoa focus-visible:text-cocoa",
+  },
+  {
+    code: "CALMPUP10",
+    offer: "10% off",
+    tone: "group border-mint/50 text-mint hover:text-cocoa focus-visible:text-cocoa",
+  },
+];
+
 export default function Footer() {
+  const [copied, setCopied] = useState<string | null>(null);
+  const timeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  useEffect(() => {
+    return () => {
+      if (timeoutRef.current) clearTimeout(timeoutRef.current);
+    };
+  }, []);
+
+  const copyCode = (code: string) => {
+    if (navigator.clipboard?.writeText) {
+      void navigator.clipboard.writeText(code).catch(() => {});
+    }
+    setCopied(code);
+    if (timeoutRef.current) clearTimeout(timeoutRef.current);
+    timeoutRef.current = setTimeout(() => setCopied(null), 1500);
+  };
+
   return (
     <footer className="border-t border-cream/10 bg-pine-base text-cream" data-nav-theme="dark">
       <div className="section-shell grid gap-12 py-16 md:grid-cols-12">
@@ -43,6 +78,16 @@ export default function Footer() {
           <p className="mt-4 text-sm text-cream/50">
             10% of every order feeds and treats street dogs.
           </p>
+          <div className="mt-6">
+            <CubertoButton
+              href="mailto:hello@pawvault.example"
+              variant="dark"
+              className="px-5 py-2.5"
+            >
+              <MailIcon className="h-4 w-4" />
+              hello@pawvault.example
+            </CubertoButton>
+          </div>
         </div>
 
         <div className="md:col-span-2">
@@ -50,8 +95,11 @@ export default function Footer() {
           <ul className="mt-5 space-y-3 text-sm font-medium text-cream/75">
             {exploreLinks.map((link) => (
               <li key={link.href}>
-                <Link href={link.href} className="transition hover:text-butter">
-                  {link.label}
+                <Link href={link.href} className="cuberto-nav-link transition hover:text-butter">
+                  <span className="cuberto-nav-link-inner">{link.label}</span>
+                  <span className="cuberto-nav-link-clone" aria-hidden="true">
+                    {link.label}
+                  </span>
                 </Link>
               </li>
             ))}
@@ -63,8 +111,11 @@ export default function Footer() {
           <ul className="mt-5 space-y-3 text-sm font-medium text-cream/75">
             {helpLinks.map((link) => (
               <li key={link.href}>
-                <Link href={link.href} className="transition hover:text-butter">
-                  {link.label}
+                <Link href={link.href} className="cuberto-nav-link transition hover:text-butter">
+                  <span className="cuberto-nav-link-inner">{link.label}</span>
+                  <span className="cuberto-nav-link-clone" aria-hidden="true">
+                    {link.label}
+                  </span>
                 </Link>
               </li>
             ))}
@@ -74,17 +125,23 @@ export default function Footer() {
         <div className="md:col-span-3">
           <h3 className="eyebrow text-cream">Promo codes</h3>
           <p className="mt-5 text-sm leading-relaxed text-cream/65">
-            A little treat for you and your dog. Apply these at checkout.
+            A little treat for you and your dog. Click to copy and apply at checkout.
           </p>
           <div className="mt-4 flex flex-col gap-2.5">
-            <span className="inline-flex w-fit items-center gap-2 rounded-full border border-butter/50 bg-butter/10 px-4 py-2 text-sm font-bold tracking-wide text-butter">
-              GOODBOY15
-              <span className="font-normal text-cream/60">15% off</span>
-            </span>
-            <span className="inline-flex w-fit items-center gap-2 rounded-full border border-mint/50 bg-mint/10 px-4 py-2 text-sm font-bold tracking-wide text-mint">
-              CALMPUP10
-              <span className="font-normal text-cream/60">10% off</span>
-            </span>
+            {promoCodes.map((promo) => (
+              <CubertoButton
+                key={promo.code}
+                type="button"
+                variant="dark"
+                onClick={() => copyCode(promo.code)}
+                className={`w-fit px-4 py-2 ${promo.tone}`}
+              >
+                {copied === promo.code ? "Copied" : promo.code}
+                <span className="font-normal text-cream/65 transition-colors group-hover:text-cocoa/80 group-focus-visible:text-cocoa/80">
+                  {promo.offer}
+                </span>
+              </CubertoButton>
+            ))}
           </div>
         </div>
       </div>

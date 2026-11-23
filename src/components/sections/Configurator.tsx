@@ -3,6 +3,7 @@
 import Image from "next/image";
 import { useEffect, useRef, useState } from "react";
 import { SnowflakeTrayIcon, GritSheetIcon, BotanicalLeafIcon, CheckIcon, ArrowRightIcon } from "@/components/icons/PawVaultIcons";
+import { MaskedHeading, CubertoButton } from "@/components/MotionPrimitives";
 import { products, shellColors, dogSizes } from "@/data/products";
 import { addOns } from "@/data/addons";
 import { useStore, formatINR, addonItem, productItem } from "@/store/StoreContext";
@@ -54,11 +55,11 @@ export default function Configurator() {
   }
 
   return (
-    <section id="configure" data-nav-theme="light" className="scroll-mt-24 overflow-x-clip bg-[#EFE3CF] py-20 pb-28 text-pine">
+    <section id="configure" data-nav-theme="light" className="-mt-10 scroll-mt-24 overflow-x-clip rounded-t-[40px] bg-[#F7EFE2] pt-24 pb-28 text-pine lg:-mt-14 lg:rounded-t-[56px]">
       <div className="section-shell">
         <div className="mx-auto max-w-2xl text-center">
           <p className="eyebrow">Build your vault</p>
-          <h2 className="display-title mt-3">Make it yours, {dogName}.</h2>
+          <MaskedHeading as="h2" className="display-title mt-3">Make it yours, {dogName}.</MaskedHeading>
           <p className="mt-4 text-cocoa/65">Pick a version, a shell colour that reads calm to your dog, and the add-ons that fit your routine.</p>
         </div>
 
@@ -82,28 +83,31 @@ export default function Configurator() {
                   In Your Home
                 </button>
               </div>
-              {viewMode === "product" ? (
-                <Image
-                  key={version}
-                  src={product.image}
-                  alt={`${product.name} in ${shellColors.find((c) => c.id === color)?.name}`}
-                  width={1600}
-                  height={1300}
-                  className={`mx-auto h-[420px] w-full max-w-full object-cover sm:h-[520px] ${
-                    version === "smart"
-                      ? "scale-[1.24] origin-top-left object-cover object-[42%_36%]"
-                      : "scale-[1.20] origin-top-left object-cover object-[48%_24%]"
-                  }`}
-                />
-              ) : (
-                <Image
-                  src="/images/lifestyle-living-room-dog.webp"
-                  alt={`${product.name} in a living room`}
-                  width={1600}
-                  height={1300}
-                  className="mx-auto h-[420px] w-full max-w-full object-cover sm:h-[520px]"
-                />
-              )}
+              <div className="relative h-[420px] w-full overflow-hidden sm:h-[520px]">
+                <div className={`absolute inset-0 transition-all duration-500 ease-out ${viewMode === "product" ? "scale-100 opacity-100" : "pointer-events-none scale-[1.03] opacity-0"}`}>
+                  <Image
+                    key={version}
+                    src={product.image}
+                    alt={`${product.name} in ${shellColors.find((c) => c.id === color)?.name}`}
+                    width={1600}
+                    height={1300}
+                    className={`mx-auto h-[420px] w-full max-w-full object-cover sm:h-[520px] ${
+                      version === "smart"
+                        ? "scale-[1.24] origin-top-left object-cover object-[42%_36%]"
+                        : "scale-[1.20] origin-top-left object-cover object-[48%_24%]"
+                    }`}
+                  />
+                </div>
+                <div className={`absolute inset-0 transition-all duration-500 ease-out ${viewMode === "lifestyle" ? "scale-100 opacity-100" : "pointer-events-none scale-[1.03] opacity-0"}`}>
+                  <Image
+                    src="/images/lifestyle-living-room-dog.webp"
+                    alt={`${product.name} in a living room`}
+                    width={1600}
+                    height={1300}
+                    className="mx-auto h-[420px] w-full max-w-full object-cover sm:h-[520px]"
+                  />
+                </div>
+              </div>
               <div className="absolute bottom-5 left-5 right-5 flex items-center justify-between rounded-2xl bg-cream/90 px-4 py-3 backdrop-blur">
                 <span className="tnum text-xs font-semibold text-cocoa/60">Your build</span>
                 <span className="tnum text-sm font-bold">{formatINR(grandTotal)}</span>
@@ -220,13 +224,13 @@ export default function Configurator() {
               </div>
             </div>
 
-            <button type="button" onClick={handleAdd} className="btn-primary btn-magnetic mt-8 w-full">
+            <CubertoButton type="button" onClick={handleAdd} variant="primary" className="mt-8 w-full">
               {added ? (
                 <span className="flex items-center justify-center gap-2"><CheckIcon className="h-4 w-4" /> Added to cart</span>
               ) : (
                 <span className="flex items-center justify-center gap-2">Add to cart {formatINR(grandTotal)} <ArrowRightIcon className="h-4 w-4" /></span>
               )}
-            </button>
+            </CubertoButton>
           </div>
         </div>
       </div>

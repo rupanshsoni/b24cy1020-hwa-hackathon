@@ -7,9 +7,10 @@ import { useStore } from "@/store/StoreContext";
 import {
   PawIcon,
   CartBagIcon,
-  ArrowRightIcon,
   CloseIcon,
+  ArrowRightIcon,
 } from "@/components/icons/PawVaultIcons";
+import { CubertoButton } from "@/components/MotionPrimitives";
 
 type NavTheme = "dark" | "light";
 
@@ -109,20 +110,28 @@ export default function Navbar() {
           aria-label="Main navigation"
         >
           {links.map((link) => (
-            <Link key={link.href} href={link.href} className={`transition ${linkTone}`}>
-              {link.label}
+            <Link
+              key={link.href}
+              href={link.href}
+              className={`cuberto-nav-link transition ${linkTone}`}
+            >
+              <span className="cuberto-nav-link-inner">{link.label}</span>
+              <span className="cuberto-nav-link-clone" aria-hidden="true">
+                {link.label}
+              </span>
             </Link>
           ))}
         </nav>
 
         <div className="flex items-center gap-2">
-          <Link
+          <CubertoButton
             href="/#configure"
-            className="btn-primary btn-magnetic hidden whitespace-nowrap sm:inline-flex"
+            variant="primary"
+            className="hidden whitespace-nowrap sm:inline-flex"
           >
             Build Vault
             <ArrowRightIcon className="h-4 w-4" />
-          </Link>
+          </CubertoButton>
 
           <button
             type="button"
@@ -182,14 +191,15 @@ export default function Navbar() {
               {link.label}
             </Link>
           ))}
-          <Link
+          <CubertoButton
             href="/#configure"
+            variant="primary"
             onClick={() => setMenuOpen(false)}
-            className="btn-primary btn-magnetic mt-2 w-full"
+            className="mt-2 w-full"
           >
             Build Vault
             <ArrowRightIcon className="h-4 w-4" />
-          </Link>
+          </CubertoButton>
         </nav>
       </div>
     </header>

@@ -1,6 +1,9 @@
 "use client";
 
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState, type CSSProperties } from "react";
+import { gsap } from "gsap";
+import { ScrollTrigger } from "gsap/ScrollTrigger";
+import { MaskedHeading } from "@/components/MotionPrimitives";
 import {
   createVaultScene,
   SHELL_COLORS,
@@ -89,6 +92,7 @@ const EXPLODED_IMAGE = "/images/pawvault-smart-exploded.webp";
 
 export default function Explorer() {
   const mountRef = useRef<HTMLDivElement | null>(null);
+  const deckRef = useRef<HTMLDivElement | null>(null);
   const sceneRef = useRef<SceneHandle | null>(null);
   const [mode, setMode] = useState<Mode>("smart");
   const [vision, setVision] = useState<Vision>("human");
@@ -129,6 +133,28 @@ export default function Explorer() {
     sceneRef.current?.setDogVision(vision === "dog");
   }, [vision]);
 
+  useEffect(() => {
+    gsap.registerPlugin(ScrollTrigger);
+    const deck = deckRef.current;
+    if (!deck) return;
+    const previous = new Map<string, PartKey | null>();
+    const triggers = CHAPTERS.map((chapter, i) => {
+      const el = document.getElementById(`chapter-${chapter.index}`);
+      if (!el) return null;
+      const prevKey: PartKey | null = i > 0 ? CHAPTERS[i - 1]!.key : null;
+      previous.set(chapter.index, prevKey);
+      return ScrollTrigger.create({
+        trigger: el,
+        start: "top 55%",
+        end: "bottom 55%",
+        onEnter: () => setActive(chapter.key),
+        onEnterBack: () => setActive(chapter.key),
+        onLeaveBack: () => setActive(previous.get(chapter.index) ?? null),
+      });
+    }).filter((t): t is ScrollTrigger => t !== null);
+    return () => triggers.forEach((t) => t.kill());
+  }, []);
+
   const focusChapter = useCallback((chapter: Chapter) => {
     setActive(chapter.key);
     const el = document.getElementById(`chapter-${chapter.index}`);
@@ -154,9 +180,9 @@ export default function Explorer() {
       <div className="mx-auto w-full max-w-7xl px-5 pt-16 pb-20 sm:px-8 lg:px-12 lg:pt-24">
         <header className="max-w-2xl">
           <p className="eyebrow">How it works</p>
-          <h2 className="display-title mt-3 text-[#12352E]">
+          <MaskedHeading as="h2" className="display-title mt-3 text-[#12352E]">
             Six puzzle layers, one happy dog
-          </h2>
+          </MaskedHeading>
           <p className="mt-4 max-w-xl text-base leading-relaxed text-[#12352E]/70">
             Rotate the vault, peel back the shell, and follow each chapter as the day
             unfolds. Every layer is built to be understood at a glance.
@@ -169,7 +195,7 @@ export default function Explorer() {
               data-cursor="drag"
               className="relative overflow-hidden rounded-3xl bg-[#12352E] p-4 shadow-[0_30px_60px_-30px_rgba(18,53,46,0.6)]"
             >
-              <div className="relative aspect-square w-full overflow-hidden rounded-2xl">
+              <div className="relative aspect-square max-h-[460px] w-full overflow-hidden rounded-2xl">
                 <div ref={mountRef} className="absolute inset-0" />
                 {webglFailed || showPhoto ? (
                   // eslint-disable-next-line @next/next/no-img-element
@@ -181,14 +207,14 @@ export default function Explorer() {
                 ) : null}
               </div>
 
-              <div className="mt-4 flex flex-wrap items-center gap-2">
+              <div className="mt-4 flex flex-wrap items-center gap-1.5">
                 <div className="flex overflow-hidden rounded-full border border-[#EFE3CF]/25">
                   {(["pure", "smart"] as Mode[]).map((m) => (
                     <button
                       key={m}
                       type="button"
                       onClick={() => setMode(m)}
-                      className={`px-4 py-1.5 text-xs font-semibold capitalize transition ${
+                      className={`px-3 py-1.5 text-xs font-semibold capitalize transition ${
                         mode === m
                           ? "bg-[#EFE3CF] text-[#12352E]"
                           : "text-[#EFE3CF]/70 hover:text-[#EFE3CF]"
@@ -202,7 +228,7 @@ export default function Explorer() {
                 <button
                   type="button"
                   onClick={() => setVision(vision === "dog" ? "human" : "dog")}
-                  className="inline-flex items-center gap-2 rounded-full border border-[#EFE3CF]/25 px-4 py-1.5 text-xs font-semibold text-[#EFE3CF] transition hover:bg-[#EFE3CF]/10"
+                  className="inline-flex items-center gap-1.5 rounded-full border border-[#EFE3CF]/25 px-3 py-1.5 text-xs font-semibold text-[#EFE3CF] transition hover:bg-[#EFE3CF]/10"
                 >
                   <EyeVisionIcon className="h-4 w-4" />
                   {vision === "dog" ? "Dog's Eyes" : "Human View"}
@@ -211,7 +237,7 @@ export default function Explorer() {
                 <button
                   type="button"
                   onClick={() => setExploded((v) => !v)}
-                  className="rounded-full border border-[#EFE3CF]/25 px-4 py-1.5 text-xs font-semibold text-[#EFE3CF] transition hover:bg-[#EFE3CF]/10"
+                  className="rounded-full border border-[#EFE3CF]/25 px-3 py-1.5 text-xs font-semibold text-[#EFE3CF] transition hover:bg-[#EFE3CF]/10"
                 >
                   {exploded ? "Assemble" : "Explode"}
                 </button>
@@ -219,7 +245,7 @@ export default function Explorer() {
                 <button
                   type="button"
                   onClick={() => setShowPhoto((v) => !v)}
-                  className={`rounded-full border px-4 py-1.5 text-xs font-semibold transition ${
+                  className={`rounded-full border px-3 py-1.5 text-xs font-semibold transition ${
                     showPhoto
                       ? "border-[#EFE3CF] bg-[#EFE3CF] text-[#12352E]"
                       : "border-[#EFE3CF]/25 text-[#EFE3CF] hover:bg-[#EFE3CF]/10"
@@ -231,7 +257,7 @@ export default function Explorer() {
                 <button
                   type="button"
                   onClick={resetView}
-                  className="ml-auto inline-flex items-center gap-1.5 rounded-full border border-[#EFE3CF]/25 px-3 py-1.5 text-xs font-semibold text-[#EFE3CF] transition hover:bg-[#EFE3CF]/10"
+                  className="ml-auto inline-flex items-center gap-1 rounded-full border border-[#EFE3CF]/25 px-3 py-1.5 text-xs font-semibold text-[#EFE3CF] transition hover:bg-[#EFE3CF]/10"
                 >
                   <CloseIcon className="h-3.5 w-3.5" />
                   Reset
@@ -265,22 +291,30 @@ export default function Explorer() {
             </div>
           </div>
 
-          <div className="flex flex-col gap-5">
-            {CHAPTERS.map((chapter) => {
+          <div ref={deckRef} className="flex flex-col gap-5">
+            {CHAPTERS.map((chapter, i) => {
               const isActive = active === chapter.key;
+              const isCovered = i < CHAPTERS.findIndex((c) => c.key === active);
               return (
                 <button
                   key={chapter.index}
                   id={`chapter-${chapter.index}`}
                   type="button"
+                  data-cursor-icon="arrow-up-right"
                   onClick={() => focusChapter(chapter)}
-                  className={`group relative block w-full rounded-3xl p-6 text-left transition lg:sticky lg:top-24 ${
-                    isActive ? "shadow-[0_24px_48px_-28px_rgba(18,53,46,0.55)]" : ""
+                  className={`group relative block w-full rounded-3xl p-6 text-left transition-all duration-500 ease-out lg:sticky lg:top-[var(--card-top)] ${
+                    isActive
+                      ? "z-20 scale-[1.01] border border-[#12352E]/40 shadow-[0_24px_48px_-28px_rgba(18,53,46,0.55)] ring-2 ring-[#12352E]/15"
+                      : isCovered
+                        ? "z-10 opacity-70 lg:scale-[0.97]"
+                        : "z-0 opacity-100"
                   }`}
-                  style={{
-                    backgroundColor: chapter.color,
-                    top: `${96 + Number(chapter.index) * 14}px`,
-                  }}
+                  style={
+                    {
+                      backgroundColor: chapter.color,
+                      "--card-top": `${96 + Number(chapter.index) * 14}px`,
+                    } as CSSProperties
+                  }
                 >
                   <div className="flex items-baseline justify-between gap-4">
                     <span className="font-display tnum text-4xl font-bold text-[#12352E]">

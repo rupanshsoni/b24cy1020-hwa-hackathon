@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState, type ReactNode } from "react";
+import { CubertoButton } from "@/components/MotionPrimitives";
 import { useStore } from "@/store/StoreContext";
 import {
   PianoKeysIcon,
@@ -31,6 +32,16 @@ const modes: Mode[] = [
 
 const PIANO_NOTES = [261.63, 329.63, 392.0, 523.25, 392.0, 329.63, 293.66, 349.23];
 
+const MODE_TEMPO: Record<ModeId, number> = {
+  piano: 2.4,
+  reggae: 3.2,
+  rock: 4.2,
+  voice: 2.0,
+  rain: 1.4,
+};
+
+const BAR_COUNT = 16;
+
 export default function SoundLab() {
   const { dogName } = useStore();
   const [mode, setMode] = useState<ModeId>("piano");
@@ -42,6 +53,11 @@ export default function SoundLab() {
   const filterRef = useRef<BiquadFilterNode | null>(null);
   const timerRef = useRef<number | null>(null);
   const nodesRef = useRef<AudioScheduledSourceNode[]>([]);
+  const barsRef = useRef<(HTMLSpanElement | null)[]>([]);
+  const rafRef = useRef<number | null>(null);
+  const volumeRef = useRef(volume);
+
+  volumeRef.current = volume;
 
   function ensureContext() {
     if (!ctxRef.current) {
@@ -146,8 +162,56 @@ export default function SoundLab() {
   }, [playing]);
 
   useEffect(() => {
+    const bars = barsRef.current;
+    const setBars = (fn: (bar: HTMLSpanElement, i: number) => void) => {
+      bars.forEach((bar, i) => {
+        if (!bar) return;
+        bar.style.transformOrigin = "bottom";
+        fn(bar, i);
+      });
+    };
+
+    if (!playing) {
+      if (rafRef.current !== null) cancelAnimationFrame(rafRef.current);
+      rafRef.current = null;
+      setBars((bar) => { bar.style.transform = "scaleY(0.18)"; });
+      return;
+    }
+
+    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
+      setBars((bar, i) => {
+        const value = 0.25 + Math.abs(Math.sin(i * 0.9 + i)) * 0.6;
+        bar.style.transform = `scaleY(${value.toFixed(3)})`;
+      });
+      return;
+    }
+
+    const tempo = MODE_TEMPO[mode];
+    const start = performance.now();
+    const animate = (now: number) => {
+      const t = (now - start) / 1000;
+      const amp = 0.25 + (volumeRef.current / 100) * 0.75;
+      setBars((bar, i) => {
+        const wave =
+          Math.sin(t * tempo + i * 0.55) * 0.5 +
+          Math.sin(t * tempo * 1.7 + i * 0.31) * 0.3 +
+          Math.sin(t * tempo * 0.6 + i * 0.83) * 0.2;
+        const height = Math.min(1, Math.max(0.12, 0.4 + wave * amp * 0.6));
+        bar.style.transform = `scaleY(${height.toFixed(3)})`;
+      });
+      rafRef.current = requestAnimationFrame(animate);
+    };
+    rafRef.current = requestAnimationFrame(animate);
+    return () => {
+      if (rafRef.current !== null) cancelAnimationFrame(rafRef.current);
+      rafRef.current = null;
+    };
+  }, [playing, mode]);
+
+  useEffect(() => {
     return () => {
       if (timerRef.current) window.clearInterval(timerRef.current);
+      if (rafRef.current !== null) cancelAnimationFrame(rafRef.current);
       nodesRef.current.forEach((n) => { try { n.stop(); } catch {} });
       ctxRef.current?.close().catch(() => {});
       ctxRef.current = null;
@@ -204,15 +268,17 @@ export default function SoundLab() {
           )}
 
           <div className="mt-5 flex flex-wrap items-center gap-3">
-            <button
+            <CubertoButton
               type="button"
+              variant="primary"
               onClick={() => { ensureContext(); setPlaying(true); }}
               disabled={playing}
-              className="btn-primary btn-magnetic inline-flex items-center gap-2 disabled:opacity-50"
+              aria-pressed={playing}
+              className="inline-flex items-center gap-2"
             >
               <PlayTriangleIcon className="h-4 w-4" />
-              Play {activeMode.name}
-            </button>
+              {playing ? "Playing " : "Play "}{activeMode.name}
+            </CubertoButton>
             <button
               type="button"
               onClick={stop}
@@ -266,13 +332,14 @@ export default function SoundLab() {
             <p className="text-xs font-bold text-sky">Low-pass filter active</p>
             <p className="mt-1 text-sm text-cream/80">Harsh high frequencies above 1.8 kHz are filtered out. What remains is warm, muffled and dog-friendly.</p>
             <div className="mt-3 flex h-8 items-end gap-1">
-              {Array.from({ length: 16 }).map((_, i) => (
+              {Array.from({ length: BAR_COUNT }).map((_, i) => (
                 <span
                   key={i}
-                  className={`flex-1 rounded-t transition-all duration-500 ${
+                  ref={(el) => { barsRef.current[i] = el; }}
+                  className={`h-full flex-1 origin-bottom rounded-t will-change-transform ${
                     i % 2 === 0 ? "bg-butter/85" : "bg-sky/85"
                   }`}
-                  style={{ height: playing ? `${20 + Math.abs(Math.sin(i * 0.7 + db)) * 80}%` : "18%" }}
+                  style={{ transform: "scaleY(0.18)" }}
                 />
               ))}
             </div>

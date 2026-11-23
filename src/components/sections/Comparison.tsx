@@ -1,6 +1,13 @@
 "use client";
 
-import Link from "next/link";
+import { useEffect, useRef } from "react";
+import gsap from "gsap";
+import { ScrollTrigger } from "gsap/ScrollTrigger";
+import {
+  CubertoButton,
+  MaskedHeading,
+  RevealStagger,
+} from "@/components/MotionPrimitives";
 import { comparisonRows } from "@/data/comparison";
 import {
   CheckCircleIcon,
@@ -78,21 +85,48 @@ function renderCell(value: CellValue, highlighted: boolean) {
 }
 
 export default function Comparison() {
+  const tableRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const root = tableRef.current;
+    if (!root) return;
+    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+    const rows = root.querySelectorAll("tbody tr");
+    if (!rows.length) return;
+    gsap.registerPlugin(ScrollTrigger);
+    const ctx = gsap.context(() => {
+      gsap.from(rows, {
+        y: 18,
+        autoAlpha: 0,
+        stagger: 0.055,
+        duration: 0.6,
+        ease: "power2.out",
+        clearProps: "transform,opacity,visibility",
+        scrollTrigger: {
+          trigger: root,
+          start: "top 82%",
+          once: true,
+        },
+      });
+    }, root);
+    return () => ctx.revert();
+  }, []);
+
   return (
     <section
       id="compare"
       data-nav-theme="dark"
-      className="relative -mt-10 rounded-t-[40px] bg-pine py-20 pb-28 text-cream lg:-mt-14 lg:rounded-t-[56px]"
+      className="relative z-10 -mt-10 rounded-t-[40px] bg-pine py-20 pb-28 text-cream lg:-mt-14 lg:rounded-t-[56px]"
     >
       <div className="section-shell">
         <p className="eyebrow">The PawVault difference</p>
-        <h2 className="display-title">Better than the rest</h2>
+        <MaskedHeading as="h2" className="display-title">Better than the rest</MaskedHeading>
         <p className="mt-4 max-w-2xl text-cream/70">
           One toy that does the work of five. See how PawVault stacks up against
           the usual options.
         </p>
 
-        <div className="mt-10 overflow-x-auto rounded-3xl border border-cream/10 bg-pine-elevated">
+        <div ref={tableRef} className="mt-10 overflow-x-auto rounded-3xl border border-cream/10 bg-pine-elevated">
           <table className="w-full min-w-[760px] border-collapse text-center">
             <thead>
               <tr className="border-b border-cream/10">
@@ -114,7 +148,7 @@ export default function Comparison() {
             </thead>
             <tbody>
               {competitorRows.map((row) => (
-                <tr key={row.feature} className="border-b border-cream/10 last:border-0">
+                <tr key={row.feature} className="border-b border-cream/10 transition-colors last:border-0 hover:bg-cream/5">
                   <th className="p-4 text-left text-sm font-medium text-cream">
                     {row.feature}
                   </th>
@@ -132,7 +166,7 @@ export default function Comparison() {
           </table>
         </div>
 
-        <div className="mt-16 grid gap-8 lg:grid-cols-2">
+        <RevealStagger className="mt-16 grid gap-8 lg:grid-cols-2" stagger={0.12} y={28}>
           <div className="overflow-x-auto rounded-3xl border border-cream/10 bg-pine-elevated">
             <table className="w-full min-w-[320px] border-collapse text-center">
               <thead>
@@ -147,7 +181,7 @@ export default function Comparison() {
               </thead>
               <tbody>
                 {comparisonRows.map((row) => (
-                  <tr key={row.feature} className="border-b border-cream/10 last:border-0">
+                  <tr key={row.feature} className="border-b border-cream/10 transition-colors last:border-0 hover:bg-cream/5">
                     <td className="p-4 text-left text-sm text-cream/90">
                       {row.feature}
                     </td>
@@ -172,7 +206,7 @@ export default function Comparison() {
               </thead>
               <tbody>
                 {comparisonRows.map((row) => (
-                  <tr key={row.feature} className="border-b border-cream/10 last:border-0">
+                  <tr key={row.feature} className="border-b border-cream/10 transition-colors last:border-0 hover:bg-cream/5">
                     <td className="p-4 text-left text-sm text-cream/90">
                       {row.feature}
                     </td>
@@ -182,16 +216,13 @@ export default function Comparison() {
               </tbody>
             </table>
           </div>
-        </div>
+        </RevealStagger>
 
         <div className="mt-12 flex justify-center">
-          <Link
-            href="#configure"
-            className="btn-primary btn-magnetic inline-flex items-center gap-2"
-          >
+          <CubertoButton href="#configure" variant="primary" className="inline-flex items-center gap-2">
             Build your PawVault
             <ArrowRightIcon className="h-5 w-5" />
-          </Link>
+          </CubertoButton>
         </div>
       </div>
     </section>

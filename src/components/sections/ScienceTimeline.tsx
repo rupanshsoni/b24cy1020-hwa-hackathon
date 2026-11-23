@@ -1,6 +1,7 @@
 "use client";
 
-import { useState, type ElementType } from "react";
+import { useEffect, useRef, useState, type ElementType } from "react";
+import gsap from "gsap";
 import { useStore } from "@/store/StoreContext";
 import {
   HomeAnchorIcon,
@@ -88,6 +89,23 @@ export default function ScienceTimeline() {
   const { dogName } = useStore();
   const [active, setActive] = useState(0);
   const stage = stages[active];
+  const panelRef = useRef<HTMLDivElement>(null);
+  const didMountRef = useRef(false);
+
+  useEffect(() => {
+    if (!didMountRef.current) {
+      didMountRef.current = true;
+      return;
+    }
+    const node = panelRef.current;
+    if (!node) return;
+    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+    gsap.fromTo(
+      node,
+      { autoAlpha: 0, y: 16 },
+      { autoAlpha: 1, y: 0, duration: 0.55, ease: "expo.out", overwrite: true }
+    );
+  }, [active]);
 
   return (
     <div className="overflow-hidden rounded-3xl bg-cream shadow-xl shadow-pine/10">
@@ -109,9 +127,9 @@ export default function ScienceTimeline() {
               type="button"
               onClick={() => setActive(i)}
               aria-pressed={i === active}
-              className={`flex min-w-[112px] shrink-0 flex-col items-start gap-2 rounded-2xl border p-3 text-left transition ${
+              className={`flex min-w-[112px] shrink-0 flex-col items-start gap-2 rounded-2xl border p-3 text-left transition-all duration-300 ease-[cubic-bezier(0.16,1,0.3,1)] ${
                 i === active
-                  ? "border-pine bg-pine text-cream"
+                  ? "-translate-y-0.5 border-pine bg-pine text-cream shadow-md"
                   : "border-pine/15 bg-white/60 text-pine hover:border-pine/40"
               }`}
             >
@@ -124,21 +142,23 @@ export default function ScienceTimeline() {
           ))}
         </div>
 
-        <div className="mt-4 grid gap-6 rounded-3xl bg-pine p-6 text-cream sm:grid-cols-[auto_1fr] sm:p-8">
-          <div className="flex h-16 w-16 items-center justify-center rounded-2xl bg-mint text-pine [&>svg]:h-9 [&>svg]:w-9">
-            <stage.icon />
-          </div>
-          <div>
-            <p className="eyebrow text-mint">
-              <span className="tnum">{stage.time}</span> and what happens
-            </p>
-            <h4 className="mt-2 font-display text-2xl font-bold leading-snug">{stage.title}</h4>
-            <p className="mt-3 text-sm leading-relaxed text-cream/75">
-              {stage.summary.replace("your dog", dogName)}
-            </p>
-            <div className="mt-5 rounded-2xl border border-cream/15 bg-cream/10 px-4 py-3">
-              <p className="text-xs font-bold text-mint">Backed by {stage.study}</p>
-              <p className="mt-1 text-sm text-cream/80">{stage.citation}</p>
+        <div className="overflow-hidden rounded-3xl">
+          <div ref={panelRef} className="mt-4 grid gap-6 rounded-3xl bg-pine p-6 text-cream sm:grid-cols-[auto_1fr] sm:p-8">
+            <div className="flex h-16 w-16 items-center justify-center rounded-2xl bg-mint text-pine [&>svg]:h-9 [&>svg]:w-9">
+              <stage.icon />
+            </div>
+            <div>
+              <p className="eyebrow text-mint">
+                <span className="tnum">{stage.time}</span> and what happens
+              </p>
+              <h4 className="mt-2 font-display text-2xl font-bold leading-snug">{stage.title}</h4>
+              <p className="mt-3 text-sm leading-relaxed text-cream/75">
+                {stage.summary.replace("your dog", dogName)}
+              </p>
+              <div className="mt-5 rounded-2xl border border-cream/15 bg-cream/10 px-4 py-3">
+                <p className="text-xs font-bold text-mint">Backed by {stage.study}</p>
+                <p className="mt-1 text-sm text-cream/80">{stage.citation}</p>
+              </div>
             </div>
           </div>
         </div>
