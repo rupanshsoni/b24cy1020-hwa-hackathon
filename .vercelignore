@@ -5,3 +5,5 @@ submit.py
 hwa-start.*
 .next
 node_modules
+Gemini_Generated_Image_*.png
+opencode.json
